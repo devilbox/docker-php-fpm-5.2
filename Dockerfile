@@ -147,4 +147,4 @@ COPY docker-php-* /usr/local/bin/
 
 
 EXPOSE 9000
-CMD ["php-cgi", "--fpm"]
+CMD ["php-fpm"]
