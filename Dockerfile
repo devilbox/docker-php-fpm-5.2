@@ -142,6 +142,7 @@ RUN set -x \
 
 
 WORKDIR /var/www/html
+COPY php-fpm /usr/local/sbin/php-fpm
 COPY php-fpm.conf /usr/local/etc/
 COPY docker-php-* /usr/local/bin/
 
