@@ -46,7 +46,8 @@ install:
 ### Build and test
 ###
 before_script:
-  - docker build -t ${IMAGE} .
+  - make build
+  - make test
 
 
 ###
