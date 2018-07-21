@@ -142,9 +142,10 @@ RUN set -x \
 
 
 WORKDIR /var/www/html
+COPY docker-php-* /usr/local/bin/
 COPY php-fpm /usr/local/sbin/php-fpm
 COPY php-fpm.conf /usr/local/etc/
-COPY docker-php-* /usr/local/bin/
+COPY php.ini /usr/local/etc/php/php.ini
 
 
 EXPOSE 9000
