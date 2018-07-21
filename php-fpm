@@ -1,3 +1,18 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-exec /usr/local/bin/php-cgi --fpm
+# Try to mimic the behaviour php-fpm commandline binary
+
+if [ "${#}" -eq "0" ]; then
+
+	exec /usr/local/bin/php-cgi --fpm
+
+elif [ "${#}" -eq "1" ]; then
+
+	if [ "${1}" = "--test" ]; then
+		exec echo "Not implemented: --test"
+	elif [ "${1}" = "-v" ]; then
+		exec /usr/local/bin/php-cgi -v
+	elif [ "${1}" = "-m" ]; then
+		exec /usr/local/bin/php-cgi -m
+	fi
+fi

@@ -148,4 +148,4 @@ COPY docker-php-* /usr/local/bin/
 
 
 EXPOSE 9000
-CMD ["php-fpm"]
+ENTRYPOINT ["php-fpm"]
