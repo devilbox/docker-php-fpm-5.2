@@ -70,9 +70,9 @@ chmod 0644 "${DOC_ROOT_HOST}/error.php"
 ### Start containers
 ###
 PHP_DID="$( docker run -d --name ${NAME_PHP} -v ${DOC_ROOT_HOST}:${DOC_ROOT_CONT} ${CONT_PHP} )"
-sleep 2
+sleep 4
 WEB_DID="$( docker run -d --name ${NAME_WEB} -v ${DOC_ROOT_HOST}:${DOC_ROOT_CONT} -v ${CONFIG_HOST}:${CONFIG_CONT} -p ${WWW_PORT}:80 --link ${NAME_PHP} ${CONT_WEB} )"
-sleep 2
+sleep 4
 
 
 ###
@@ -83,11 +83,10 @@ sleep 2
 ###
 ### Test for PHP success
 ###
-FAILED=0
 echo "[TEST] curl index.php:"
 echo "------------------------------------"
-if ! curl 127.0.0.1:${WWW_PORT}/index.php 2>/dev/null | grep 'itworks'; then
-	echo "[FAILED], gathering info"
+if ! curl -sS 127.0.0.1:${WWW_PORT}/index.php 2>/dev/null | grep 'itworks'; then
+	echo "[FAILED], could not connect to index.php"
 	echo
 
 	echo "index.php:"
@@ -97,7 +96,7 @@ if ! curl 127.0.0.1:${WWW_PORT}/index.php 2>/dev/null | grep 'itworks'; then
 
 	echo "curl:"
 	echo "------------------------------------"
-	curl 127.0.0.1:${WWW_PORT}/index/php
+	curl -v 127.0.0.1:${WWW_PORT}/index.php
 	echo
 
 	echo "docker logs php"
@@ -109,8 +108,50 @@ if ! curl 127.0.0.1:${WWW_PORT}/index.php 2>/dev/null | grep 'itworks'; then
 	echo "------------------------------------"
 	docker logs "${WEB_DID}"
 	echo
-	FAILED=1
+
+	docker stop "${WEB_DID}" || true
+	docker stop "${PHP_DID}" || true
+
+	docker rm -f "${NAME_WEB}" || true
+	docker rm -f "${NAME_PHP}" || true
+
+	rm -rf "${DOC_ROOT_HOST}"
+	rm -rf "${CONFIG_HOST}"
+	exit 1
 fi
+echo "[SUCCESS]"
+echo
+
+###
+### Test for Docker access logs
+###
+echo "[TEST] docker logs 'GET /index.php':"
+echo "------------------------------------"
+if ! docker logs "${WEB_DID}" 2>&1 | grep 'GET /index.php'; then
+	echo "[FAILED], could not find access requests in docker logs."
+	echo
+
+	echo "docker logs php"
+	echo "------------------------------------"
+	docker logs "${PHP_DID}"
+	echo
+
+	echo "docker logs web"
+	echo "------------------------------------"
+	docker logs "${WEB_DID}"
+	echo
+
+	docker stop "${WEB_DID}" || true
+	docker stop "${PHP_DID}" || true
+
+	docker rm -f "${NAME_WEB}" || true
+	docker rm -f "${NAME_PHP}" || true
+
+	rm -rf "${DOC_ROOT_HOST}"
+	rm -rf "${CONFIG_HOST}"
+	exit 1
+fi
+echo "[SUCCESS]"
 echo
 
 
@@ -119,34 +160,89 @@ echo
 ###
 echo "[TEST] curl error.php:"
 echo "------------------------------------"
-curl 127.0.0.1:${WWW_PORT}/error.php 2>/dev/null
-sleep 2
+if ! curl -sS 127.0.0.1:${WWW_PORT}/error.php 2>/dev/null | grep 'syntax error'; then
+	echo "[FAILED], could not connect to error.php"
+	echo
+
+	echo "error.php:"
+	echo "------------------------------------"
+	cat "${DOC_ROOT_HOST}/index.php"
+	echo
+
+	echo "curl:"
+	echo "------------------------------------"
+	curl -v 127.0.0.1:${WWW_PORT}/error.php
+	echo
+
+	echo "docker logs php"
+	echo "------------------------------------"
+	docker logs "${PHP_DID}"
+	echo
+
+	echo "docker logs web"
+	echo "------------------------------------"
+	docker logs "${WEB_DID}"
+	echo
+
+	docker stop "${WEB_DID}" || true
+	docker stop "${PHP_DID}" || true
+
+	docker rm -f "${NAME_WEB}" || true
+	docker rm -f "${NAME_PHP}" || true
+
+	rm -rf "${DOC_ROOT_HOST}"
+	rm -rf "${CONFIG_HOST}"
+	exit 1
+fi
+echo "[SUCCESS]"
 echo
-docker logs "${PHP_DID}"
-docker logs "${WEB_DID}"
-docker exec "${PHP_DID}" ls -lap /usr/local/logs
-docker exec "${PHP_DID}" ls -lap /var/log
 
-docker exec "${PHP_DID}" php ${DOC_ROOT_CONT}/error.php
-docker logs "${PHP_DID}"
-docker logs "${WEB_DID}"
-docker exec "${PHP_DID}" ls -lap /usr/local/logs
-docker exec "${PHP_DID}" ls -lap /var/log
+###
+### Test for Docker error logs
+###
+echo "[TEST] docker logs 'syntax error':"
+echo "------------------------------------"
+
+if ! docker logs "${WEB_DID}" 2>&1 | grep 'syntax error'; then
+	echo "[FAILED], could not find error message in docker logs."
+	echo
+
+	echo "docker logs php"
+	echo "------------------------------------"
+	docker logs "${PHP_DID}"
+	echo
+
+	echo "docker logs web"
+	echo "------------------------------------"
+	docker logs "${WEB_DID}"
+	echo
+
+	docker stop "${WEB_DID}" || true
+	docker stop "${PHP_DID}" || true
+
+	docker rm -f "${NAME_WEB}" || true
+	docker rm -f "${NAME_PHP}" || true
+
+	rm -rf "${DOC_ROOT_HOST}"
+	rm -rf "${CONFIG_HOST}"
+	exit 1
+fi
+echo "[SUCCESS]"
+echo
 
 
-#docker exec "${PHP_DID}" cat /usr/local/logs/fpm.err
-#docker exec "${PHP_DID}" cat /usr/local/logs/err.log
 ###
 ### Clean-up
 ###
-docker stop "${WEB_DID}"
-docker stop "${PHP_DID}"
+echo "[CLEANUP] shutdown:"
+echo "------------------------------------"
+docker stop "${WEB_DID}" >/dev/null 2>&1 || true
+docker stop "${PHP_DID}" >/dev/null 2>&1 || true
 
-docker rm -f "${NAME_WEB}"
-docker rm -f "${NAME_PHP}"
+docker rm -f "${NAME_WEB}" >/dev/null 2>&1 || true
+docker rm -f "${NAME_PHP}" >/dev/null 2>&1 || true
 
-if [ "${FAILED}" -ne "0" ]; then
-	exit 1
-fi
+rm -rf "${DOC_ROOT_HOST}" >/dev/null 2>&1 || true
+rm -rf "${CONFIG_HOST}"   >/dev/null 2>&1 || true
 
 exit 0
