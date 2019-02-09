@@ -4,7 +4,6 @@ MAINTAINER "cytopia" <cytopia@everythingcli.org>
 
 ENV PHP_VERSION 5.2.17
 ENV PHP_INI_DIR /usr/local/etc/php
-ENV GPG_KEYS 0B96609E270F565C13292B24C13C70B87267B52D 0A95E9A026542D53835E3F3A7DEC4E69FC9C83D7 0E604491
 
 
 # Setup directories
@@ -43,12 +42,6 @@ RUN set -x \
 	&& rm -r /var/lib/apt/lists/*
 
 
-RUN set -xe \
-	&& for key in $GPG_KEYS; do \
-		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "${key}"; \
-	done
-
-
 # compile openssl, otherwise --with-openssl won't work
 RUN set -x \
 	&& OPENSSL_VERSION="1.0.2g" \
@@ -56,7 +49,6 @@ RUN set -x \
 	&& mkdir openssl \
 	&& curl -sL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
 	&& curl -sL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
-	&& gpg --verify openssl.tar.gz.asc \
 	&& tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
 	&& cd /tmp/openssl \
 	&& ./config && make && make install \
@@ -84,7 +76,7 @@ RUN set -x \
 
 
 # Copy and apply patches to PHP
-COPY php-${PHP_VERSION}*.patch /tmp/
+COPY data/php-${PHP_VERSION}*.patch /tmp/
 RUN set -x \
 	&& curl -SL "http://museum.php.net/php5/php-${PHP_VERSION}.tar.gz" -o /usr/src/php.tar.gz \
 	\
@@ -104,7 +96,7 @@ RUN set -x \
 	&& rm -rf /tmp/php-*
 
 
-COPY docker-php-source /usr/local/bin/
+COPY data/docker-php-source /usr/local/bin/
 RUN set -x \
 	&& ln -s /usr/lib/x86_64-linux-gnu/libmysqlclient* /usr/lib/ \
 	&& cd /usr/src \
@@ -142,10 +134,10 @@ RUN set -x \
 
 
 WORKDIR /var/www/html
-COPY docker-php-* /usr/local/bin/
-COPY php-fpm /usr/local/sbin/php-fpm
-COPY php-fpm.conf /usr/local/etc/
-COPY php.ini /usr/local/etc/php/php.ini
+COPY data/docker-php-* /usr/local/bin/
+COPY data/php-fpm /usr/local/sbin/php-fpm
+COPY data/php-fpm.conf /usr/local/etc/
+COPY data/php.ini /usr/local/etc/php/php.ini
 
 
 EXPOSE 9000
