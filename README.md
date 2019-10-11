@@ -128,6 +128,7 @@ modules enabled by default visit: **[devilbox/docker-php-fpm](https://github.com
 | xmlreader    | ✔         |
 | xmlwriter    | ✔         |
 | zlib         | ✔         |
+| GD           | ✔         |
 <!-- /modules -->
 
 ## Example
