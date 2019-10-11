@@ -22,6 +22,7 @@ RUN set -x \
 		libmysqlclient-dev \
 		libsqlite3-0 \
 		libxml2 \
+        libjpeg62-turbo libpng12-0 \
 	&& apt-get clean \
 	&& rm -r /var/lib/apt/lists/*
 
@@ -70,6 +71,7 @@ RUN set -x \
 		libssl-dev \
 		libxml2-dev \
 		patch \
+		libpng12-dev \
 	" \
 	&& set -x \
 	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/*
@@ -88,6 +90,11 @@ RUN set -x \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-openssl.patch \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-fpm.patch \
 	&& patch -p0 < /tmp/php-${PHP_VERSION}-curl.patch || true \
+# For GD
+    && ln -s /usr/lib/x86_64-linux-gnu/libjpeg.a /usr/lib/libjpeg.a \
+	&& ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/libjpeg.so \
+	&& ln -s /usr/lib/x86_64-linux-gnu/libpng.a /usr/lib/libpng.a \
+	&& ln -s /usr/lib/x86_64-linux-gnu/libpng.so /usr/lib/libpng.so \
 # Create php.tar.xz
 	&& cd /usr/src \
 	&& tar -cJf php.tar.xz php \
@@ -122,6 +129,7 @@ RUN set -x \
 		--with-pdo-mysql \
 		--with-readline \
 		--with-zlib \
+		--with-gd \
 	#&& sed -i 's/-lxml2 -lxml2 -lxml2/-lcrypto -lssl/' Makefile \
 	&& make -j"$(nproc)" \
 	&& make install \
