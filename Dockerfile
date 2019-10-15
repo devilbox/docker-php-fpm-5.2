@@ -22,7 +22,7 @@ RUN set -x \
 		libmysqlclient-dev \
 		libsqlite3-0 \
 		libxml2 \
-        libjpeg62-turbo libpng12-0 \
+        libjpeg-dev libpng12-0 \
 	&& apt-get clean \
 	&& rm -r /var/lib/apt/lists/*
 
@@ -130,6 +130,7 @@ RUN set -x \
 		--with-readline \
 		--with-zlib \
 		--with-gd \
+		--with-jpeg-dir=/usr \
 	#&& sed -i 's/-lxml2 -lxml2 -lxml2/-lcrypto -lssl/' Makefile \
 	&& make -j"$(nproc)" \
 	&& make install \
