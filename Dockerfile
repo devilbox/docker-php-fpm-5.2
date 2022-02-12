@@ -98,6 +98,7 @@ RUN set -x \
 
 COPY data/docker-php-source /usr/local/bin/
 RUN set -x \
+	&& apt update && apt install flex -y \
 	&& ln -s /usr/lib/x86_64-linux-gnu/libmysqlclient* /usr/lib/ \
 	&& cd /usr/src \
 	&& docker-php-source extract \
