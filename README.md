@@ -1,6 +1,9 @@
 # PHP-FPM 5.2
 
-[![Build Status](https://travis-ci.org/devilbox/docker-php-fpm-5.2.svg?branch=master)](https://travis-ci.org/devilbox/docker-php-fpm-5.2)
+[![lint](https://github.com/devilbox/docker-php-fpm-5.2/workflows/lint/badge.svg)](https://github.com/devilbox/docker-php-fpm-5.2/actions?query=workflow%3Alint)
+[![build](https://github.com/devilbox/docker-php-fpm-5.2/workflows/build/badge.svg)](https://github.com/devilbox/docker-php-fpm-5.2/actions?query=workflow%3Abuild)
+[![nightly](https://github.com/devilbox/docker-php-fpm-5.2/workflows/nightly/badge.svg)](https://github.com/devilbox/docker-php-fpm-5.2/actions?query=workflow%3Anightly)
+
 [![Tag](https://img.shields.io/github/tag/devilbox/docker-php-fpm-5.2.svg)](https://github.com/devilbox/docker-php-fpm-5.2/releases)
 [![Gitter](https://badges.gitter.im/devilbox/Lobby.svg)](https://gitter.im/devilbox/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Discourse](https://img.shields.io/discourse/https/devilbox.discourse.group/status.svg?colorB=%234CB697)](https://devilbox.discourse.group)
@@ -8,7 +11,9 @@
 [![](https://images.microbadger.com/badges/image/devilbox/php-fpm-5.2.svg)](https://microbadger.com/images/devilbox/php-fpm-5.2 "php-fpm-5.2")
 [![License](https://img.shields.io/badge/license-MIT-%233DA639.svg)](https://opensource.org/licenses/MIT)
 
-This repository will provide you a fully functional PHP-FPM 5.2.17 Docker image built from [official sources](http://museum.php.net) nightly. Additional patches have been applied to enable FPM functionality. PHP 5.2 [reached EOL](https://secure.php.net/eol.php) on 06 Jan 2011 and thus, official docker support was dropped. It provides the base for [Devilbox PHP-FPM Docker images](https://github.com/devilbox/docker-php-fpm).
+**Available Architectures:**  `amd64``
+
+-This repository will provide you a fully functional PHP-FPM 5.2.17 Docker image built from [official sources](http://museum.php.net) nightly. Additional patches have been applied to enable FPM functionality. PHP 5.2 [reached EOL](https://secure.php.net/eol.php) on 06 Jan 2011 and thus, official docker support was dropped. It provides the base for [Devilbox PHP-FPM Docker images](https://github.com/devilbox/docker-php-fpm).
 
 | Docker Hub | Upstream Project |
 |------------|------------------|
@@ -18,9 +23,12 @@ This repository will provide you a fully functional PHP-FPM 5.2.17 Docker image 
 
 Have a look at the following similar Devilbox base images for which no official versions exist yet:
 
+* [PHP-FPM 5.2](https://github.com/devilbox/docker-php-fpm-5.2)
 * [PHP-FPM 5.3](https://github.com/devilbox/docker-php-fpm-5.3)
 * [PHP-FPM 7.4](https://github.com/devilbox/docker-php-fpm-7.4)
 * [PHP-FPM 8.0](https://github.com/devilbox/docker-php-fpm-8.0)
+* [PHP-FPM 8.1](https://github.com/devilbox/docker-php-fpm-8.1)
+* [PHP-FPM 8.2](https://github.com/devilbox/docker-php-fpm-8.2)
 
 In case you are looking for development and production ready PHP-FPM images for all versions,
 which have a vast amount of modules enabled by default go here:
@@ -94,34 +102,31 @@ modules enabled by default visit: **[devilbox/docker-php-fpm](https://github.com
 <!-- modules -->
 | Module       | Built-in  |
 |--------------|-----------|
-| Core         | ✔         |
 | ctype        | ✔         |
 | curl         | ✔         |
 | date         | ✔         |
 | dom          | ✔         |
-| ereg         | ✔         |
-| fileinfo     | ✔         |
 | filter       | ✔         |
 | hash         | ✔         |
 | iconv        | ✔         |
 | json         | ✔         |
 | libxml       | ✔         |
+| mbstring     | ✔         |
 | mysql        | ✔         |
-| mysqlnd      | ✔         |
+| mysqli       | ✔         |
 | openssl      | ✔         |
 | pcre         | ✔         |
 | PDO          | ✔         |
+| pdo_mysql    | ✔         |
 | pdo_sqlite   | ✔         |
-| Phar         | ✔         |
 | posix        | ✔         |
 | readline     | ✔         |
-| recode       | ✔         |
 | Reflection   | ✔         |
 | session      | ✔         |
 | SimpleXML    | ✔         |
+| soap         | ✔         |
 | SPL          | ✔         |
 | SQLite       | ✔         |
-| sqlite3      | ✔         |
 | standard     | ✔         |
 | tokenizer    | ✔         |
 | xml          | ✔         |

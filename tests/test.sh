@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
+set -eu
+set -o pipefail
 
+CONT_PHP="${1}"
+ARCH="${2}"
 
 ###
 ### Variables
@@ -12,7 +16,6 @@ CONFIG_HOST="$( mktemp -d )"
 CONFIG_CONT="/etc/nginx/conf.d"
 
 NAME_PHP="devilbox-php-fpm-5-2"
-CONT_PHP="devilbox/php-fpm-5.2:latest"
 
 NAME_WEB="nginx-stable-devilbox"
 CONT_WEB="nginx:stable"
@@ -69,9 +72,9 @@ chmod 0644 "${DOC_ROOT_HOST}/error.php"
 ###
 ### Start containers
 ###
-PHP_DID="$( docker run -d --name ${NAME_PHP} -v ${DOC_ROOT_HOST}:${DOC_ROOT_CONT} ${CONT_PHP} )"
+PHP_DID="$( docker run -d --platform "${ARCH}" --name "${NAME_PHP}" -v "${DOC_ROOT_HOST}:${DOC_ROOT_CONT}" "${CONT_PHP}" )"
 sleep 4
-WEB_DID="$( docker run -d --name ${NAME_WEB} -v ${DOC_ROOT_HOST}:${DOC_ROOT_CONT} -v ${CONFIG_HOST}:${CONFIG_CONT} -p ${WWW_PORT}:80 --link ${NAME_PHP} ${CONT_WEB} )"
+WEB_DID="$( docker run -d --platform "${ARCH}" --name "${NAME_WEB}" -v "${DOC_ROOT_HOST}:${DOC_ROOT_CONT}" -v "${CONFIG_HOST}:${CONFIG_CONT}" -p "${WWW_PORT}:80" --link "${NAME_PHP}" "${CONT_WEB}" )"
 sleep 4
 
 
