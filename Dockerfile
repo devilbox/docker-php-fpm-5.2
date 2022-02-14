@@ -78,7 +78,7 @@ RUN set -eux \
 	fi \
 	\
 	&& ./config \
-	&& make depend
+	&& make depend \
 	&& make -j"$(nproc)" \
 	&& make install \
 	&& rm -rf /tmp/openssl*
