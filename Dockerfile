@@ -146,19 +146,25 @@ RUN set -eux \
 	&& find /usr/lib/ -name '*mariadbclient*' | xargs -n1 sh -c 'ln -s "${1}" "/usr/lib/$( basename "${1}" | sed "s|libmariadbclient|libmysqlclient|g" )"' -- \
 	#&& ln -s $(dirname $(find /usr/lib/ -name 'libmariadbclient*' | head -1))/libmariadbclient* /usr/lib/ \
 	\
-	# Fix curl lib location from '/usr/include/x86_64-linux-gnu/curl' to '/usr/include/curl'
-	&& if [ "$(dirname $(dirname $(find / -name 'easy.h')))" != "/usr/include" ]; then \
-		ln -s "$(dirname $(dirname $(find / -name 'easy.h')))/curl" /usr/include/curl; \
-	fi \
+	## Fix curl lib location from '/usr/include/x86_64-linux-gnu/curl' to '/usr/include/curl'
+	#&& if [ "$(dirname $(dirname $(find / -name 'easy.h')))" != "/usr/include" ]; then \
+	#	ln -s "$(dirname $(dirname $(find / -name 'easy.h')))/curl" /usr/include/curl; \
+	#fi \
 	\
 	&& cd /usr/src \
 	&& docker-php-source extract \
 	&& cd /usr/src/php \
 	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
 	&& debMultiarch="$(dpkg-architecture --query DEB_BUILD_MULTIARCH)" \
+	\
+# https://bugs.php.net/bug.php?id=74125
+	&& if [ ! -d /usr/include/curl ]; then \
+		ln -sT "/usr/include/$debMultiarch/curl" /usr/local/include/curl; \
+	fi \
+	\
 	&& ./configure \
 		--host="${gnuArch}" \
-		--with-libdir="${debMultiarch}" \
+		#--with-libdir="${debMultiarch}" \
 		--with-config-file-path="${PHP_INI_DIR}" \
 		--with-config-file-scan-dir="${PHP_INI_DIR}/conf.d" \
 		--with-fpm-conf="/usr/local/etc/php-fpm.conf" \
