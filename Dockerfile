@@ -6,7 +6,6 @@ ENV PHP_INI_DIR /usr/local/etc/php
 
 ENV BUILD_DEPS \
 		autoconf2.13 \
-		dpkg-dev \
 		libbison-dev \
 		libcurl4-openssl-dev \
 		libfl-dev \
@@ -44,6 +43,7 @@ RUN set -eux \
 RUN set -eux \
 	&& apt-get update && apt-get install -y --no-install-recommends \
 		autoconf \
+		dpkg-dev \
 		file \
 		g++ \
 		gcc \
@@ -66,44 +66,19 @@ RUN set -eux \
 	&& curl -sS -k -L --fail "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
 	&& tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
 	&& cd /tmp/openssl \
-	#\
-	## Fix curl lib location from '/usr/include/x86_64-linux-gnu/curl' to '/usr/include/curl'
-	#&& if [ "$(dirname $(dirname $(find / -name 'easy.h')))" != "/usr/include" ]; then \
-	#	ln -s "$(dirname $(dirname $(find / -name 'easy.h')))/curl" /usr/include/curl; \
-	#fi \
-	#\
-	## Fix cdefs.h
-	#&& if [ "$(dirname $(dirname $(find / -name 'cdefs.h')))" != "/usr/include" ]; then \
-	#	ln -s "$(dirname $(dirname $(find / -name 'cdefs.h')))/sys" /usr/include/sys; \
-	#fi \
-	#\
-	## Fix wordsize.h
-	#&& if [ "$(dirname $(dirname $(find / -name 'wordsize.h')))" != "/usr/include" ]; then \
-	#	ln -s "$(dirname $(dirname $(find / -name 'wordsize.h')))/bits" /usr/include/bits; \
-	#fi \
-	#\
-	## Fix stubs.h
-	#&& if [ "$(dirname $(dirname $(find / -name 'stubs.h')))" != "/usr/include" ]; then \
-	#	ln -s "$(dirname $(dirname $(find / -name 'stubs.h')))/gnu" /usr/include/gnu; \
-	#fi \
-	#&& if [ ! -f /usr/include/gnu/stubs-64.h ]; then \
-	#	touch /usr/include/gnu/stubs-64.h; \
-	#fi \
-	#\
-	## Fix errno.h
-	#&& if [ "$(dirname $(dirname $(find / -name 'errno.h' | grep 'asm/')))" != "/usr/include" ]; then \
-	#	ln -s "$(dirname $(dirname $(find / -name 'errno.h' | grep 'asm/')))/asm" /usr/include/asm; \
-	#fi \
-	#\
+	\
+	# Fix libs for i386
+	&& if [ "$(dpkg-architecture  --query DEB_HOST_ARCH)" = "i386" ]; then \
+		ls -1p "/usr/include/$(dpkg-architecture --query DEB_BUILD_MULTIARCH)/" \
+			| grep '/$' \
+			| xargs -n1 sh -c 'ln -s "/usr/include/$(dpkg-architecture --query DEB_BUILD_MULTIARCH)/${1}" "/usr/include/"' -- || true; \
+		touch /usr/include/gnu/stubs-64.h; \
+		ls -1 "/usr/lib/$(dpkg-architecture --query DEB_BUILD_MULTIARCH)/" \
+			| xargs -n1 sh -c 'ln -s "/usr/lib/$(dpkg-architecture --query DEB_BUILD_MULTIARCH)/${1}" "/usr/lib/"' -- || true; \
+	fi \
+	\
 	&& ./config \
-	\
-	## Fix libs
-	#ln -s $( find /usr/lib/ -type d -name '*-linux-*' | grep -vE '(/.*){4}' )/*	/usr/lib/ || true \
-	\
-	#&& if [ ! -f /usr/include/libio.h ]; then \
-	#	ln -s /usr/include/libio.h /usr/include/bio.h; \
-	#fi \
-	\
+	&& make depend
 	&& make -j"$(nproc)" \
 	&& make install \
 	&& rm -rf /tmp/openssl*
@@ -141,23 +116,15 @@ RUN set -eux \
 COPY data/docker-php-source /usr/local/bin/
 RUN set -eux \
 	&& apt update && apt install flex -y \
-	\
-	# Fix libmariadbclient lib location
-	&& find /usr/lib/ -name '*mariadbclient*' | xargs -n1 sh -c 'ln -s "${1}" "/usr/lib/$( basename "${1}" | sed "s|libmariadbclient|libmysqlclient|g" )"' -- \
-	#&& ln -s $(dirname $(find /usr/lib/ -name 'libmariadbclient*' | head -1))/libmariadbclient* /usr/lib/ \
-	\
-	## Fix curl lib location from '/usr/include/x86_64-linux-gnu/curl' to '/usr/include/curl'
-	#&& if [ "$(dirname $(dirname $(find / -name 'easy.h')))" != "/usr/include" ]; then \
-	#	ln -s "$(dirname $(dirname $(find / -name 'easy.h')))/curl" /usr/include/curl; \
-	#fi \
-	\
-	&& cd /usr/src \
 	&& docker-php-source extract \
 	&& cd /usr/src/php \
 	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
 	&& debMultiarch="$(dpkg-architecture --query DEB_BUILD_MULTIARCH)" \
 	\
-# https://bugs.php.net/bug.php?id=74125
+	# Fix libmariadbclient lib location
+	&& find /usr/lib/ -name '*mariadbclient*' | xargs -n1 sh -c 'ln -s "${1}" "/usr/lib/$( basename "${1}" | sed "s|libmariadbclient|libmysqlclient|g" )"' -- \
+	\
+	# https://bugs.php.net/bug.php?id=74125
 	&& if [ ! -d /usr/include/curl ]; then \
 		ln -sT "/usr/include/$debMultiarch/curl" /usr/local/include/curl; \
 	fi \

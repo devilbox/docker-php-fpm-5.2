@@ -66,7 +66,7 @@ lint-workflow:
 # -------------------------------------------------------------------------------------------------
 .PHONY: build
 build:
-	docker build --platform=$(ARCH) $(NO_CACHE) -t $(IMAGE) -f $(DIR)/$(FILE) $(DIR)
+	docker build --platform $(ARCH) $(NO_CACHE) -t $(IMAGE):$(TAG) -f $(DIR)/$(FILE) $(DIR)
 
 .PHONY: rebuild
 rebuild: NO_CACHE=--no-cache

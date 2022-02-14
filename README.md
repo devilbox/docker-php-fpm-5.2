@@ -11,7 +11,7 @@
 [![](https://images.microbadger.com/badges/image/devilbox/php-fpm-5.2.svg)](https://microbadger.com/images/devilbox/php-fpm-5.2 "php-fpm-5.2")
 [![License](https://img.shields.io/badge/license-MIT-%233DA639.svg)](https://opensource.org/licenses/MIT)
 
-**Available Architectures:**  `amd64`, `arm64`, `386`, `arm/v7`, `arm/v6`
+**Available Architectures:**  `amd64``
 
 -This repository will provide you a fully functional PHP-FPM 5.2.17 Docker image built from [official sources](http://museum.php.net) nightly. Additional patches have been applied to enable FPM functionality. PHP 5.2 [reached EOL](https://secure.php.net/eol.php) on 06 Jan 2011 and thus, official docker support was dropped. It provides the base for [Devilbox PHP-FPM Docker images](https://github.com/devilbox/docker-php-fpm).
 
@@ -102,34 +102,31 @@ modules enabled by default visit: **[devilbox/docker-php-fpm](https://github.com
 <!-- modules -->
 | Module       | Built-in  |
 |--------------|-----------|
-| Core         | ✔         |
 | ctype        | ✔         |
 | curl         | ✔         |
 | date         | ✔         |
 | dom          | ✔         |
-| ereg         | ✔         |
-| fileinfo     | ✔         |
 | filter       | ✔         |
 | hash         | ✔         |
 | iconv        | ✔         |
 | json         | ✔         |
 | libxml       | ✔         |
+| mbstring     | ✔         |
 | mysql        | ✔         |
-| mysqlnd      | ✔         |
+| mysqli       | ✔         |
 | openssl      | ✔         |
 | pcre         | ✔         |
 | PDO          | ✔         |
+| pdo_mysql    | ✔         |
 | pdo_sqlite   | ✔         |
-| Phar         | ✔         |
 | posix        | ✔         |
 | readline     | ✔         |
-| recode       | ✔         |
 | Reflection   | ✔         |
 | session      | ✔         |
 | SimpleXML    | ✔         |
+| soap         | ✔         |
 | SPL          | ✔         |
 | SQLite       | ✔         |
-| sqlite3      | ✔         |
 | standard     | ✔         |
 | tokenizer    | ✔         |
 | xml          | ✔         |
