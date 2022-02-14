@@ -152,7 +152,6 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1
         with:
           command: |
-            #make manifest-create TAG=${{ steps.tag.outputs.docker-tag }} ARCH="linux/amd64,linux/arm64,linux/386,linux/arm/v7,linux/arm/v6"
             make manifest-create TAG=${{ steps.tag.outputs.docker-tag }} ARCH="linux/amd64"
 
       - name: "[DEPLOY] Publish Docker manifest (only repo owner)"
