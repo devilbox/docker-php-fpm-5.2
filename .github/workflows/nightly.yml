@@ -30,13 +30,13 @@ jobs:
           - '5.2'
         arch:
           - 'linux/amd64'
+          - 'linux/386'
           #- 'linux/arm64'
-          #- 'linux/386'
           #- 'linux/arm/v7'
           #- 'linux/arm/v6'
         refs:
           - 'master'
-          - '0.19'
+          - '0.20'
     steps:
 
       # ------------------------------------------------------------
@@ -132,7 +132,7 @@ jobs:
           - '5.2'
         refs:
           - 'master'
-          - '0.19'
+          - '0.20'
     steps:
 
       # ------------------------------------------------------------
@@ -161,7 +161,7 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1
         with:
           command: |
-            make manifest-create TAG=${{ steps.tag.outputs.docker-tag }} ARCH="linux/amd64"
+            make manifest-create TAG=${{ steps.tag.outputs.docker-tag }} ARCH="linux/amd64,linux/386"
 
       - name: "[DEPLOY] Publish Docker manifest (only repo owner)"
         uses: cytopia/shell-command-retry-action@v0.1
