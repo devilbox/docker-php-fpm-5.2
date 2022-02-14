@@ -9,7 +9,7 @@ ENV BUILD_DEPS \
 		libbison-dev \
 		libcurl4-openssl-dev \
 		libfl-dev \
-		default-libmysqlclient-dev \
+		libmariadbclient-dev-compat \
 		libpcre3-dev \
 		libreadline6-dev \
 		librecode-dev \
@@ -32,7 +32,7 @@ RUN set -eux \
 		curl \
 		libpcre3 \
 		librecode0 \
-		default-libmysqlclient-dev \
+		libmariadbclient18 \
 		libsqlite3-0 \
 		libxml2 \
 	&& apt-get clean \
@@ -99,9 +99,9 @@ RUN set -eux \
 	## Fix libs
 	#ln -s $( find /usr/lib/ -type d -name '*-linux-*' | grep -vE '(/.*){4}' )/*	/usr/lib/ || true \
 	\
-	&& if [ ! -f /usr/include/libio.h ]; then \
-		ln -s /usr/include/libio.h /usr/include/bio.h; \
-	fi \
+	#&& if [ ! -f /usr/include/libio.h ]; then \
+	#	ln -s /usr/include/libio.h /usr/include/bio.h; \
+	#fi \
 	\
 	&& make -j"$(nproc)" \
 	&& make install \
@@ -141,8 +141,9 @@ COPY data/docker-php-source /usr/local/bin/
 RUN set -eux \
 	&& apt update && apt install flex -y \
 	\
-	# Fix mysqlclient lib location
-	&& ln -s $(dirname $(find /usr/lib/ -name 'libmysqlclient*' | head -1))/libmysqlclient* /usr/lib/ \
+	# Fix libmariadbclient lib location
+	&& find /usr/lib/ -name '*mariadbclient*' | xargs -n1 sh -c 'ln -s "${1}" "/usr/lib/$( basename "${1}" | sed "s|libmariadbclient|libmysqlclient|g" )"' -- \
+	#&& ln -s $(dirname $(find /usr/lib/ -name 'libmariadbclient*' | head -1))/libmariadbclient* /usr/lib/ \
 	\
 	# Fix curl lib location from '/usr/include/x86_64-linux-gnu/curl' to '/usr/include/curl'
 	&& if [ "$(dirname $(dirname $(find / -name 'easy.h')))" != "/usr/include" ]; then \
@@ -175,6 +176,7 @@ RUN set -eux \
 	#&& sed -i 's/-lxml2 -lxml2 -lxml2/-lcrypto -lssl/' Makefile \
 	&& make -j"$(nproc)" \
 	&& make install \
+	&& php -v \
 # Clean-up
 	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
 	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false ${BUILD_DEPS} \
