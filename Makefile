@@ -140,4 +140,4 @@ enter:
 
 .PHONY: pull-base-image
 pull-base-image:
-	@docker pull $(shell grep FROM Dockerfile | sed 's/^FROM\s*//g';)
+	@docker pull --platform $(ARCH) $(shell grep FROM Dockerfile | sed 's/^FROM\s*//g';)

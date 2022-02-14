@@ -1,25 +1,38 @@
-FROM debian:jessie
+FROM debian:stretch
 MAINTAINER "cytopia" <cytopia@everythingcli.org>
-
 
 ENV PHP_VERSION 5.2.17
 ENV PHP_INI_DIR /usr/local/etc/php
 
+ENV BUILD_DEPS \
+		autoconf2.13 \
+		libbison-dev \
+		libcurl4-openssl-dev \
+		libfl-dev \
+		default-libmysqlclient-dev \
+		libpcre3-dev \
+		libreadline6-dev \
+		librecode-dev \
+		libsqlite3-dev \
+		libssl-dev \
+		libxml2-dev \
+		patch
+
 
 # Setup directories
-RUN set -x \
+RUN set -eux \
 	&& mkdir -p ${PHP_INI_DIR}/conf.d \
 	&& mkdir -p /usr/src/php
 
 
 # persistent / runtime deps
-RUN set -x \
+RUN set -eux \
 	&& apt-get update && apt-get install -y --no-install-recommends \
 		ca-certificates \
 		curl \
 		libpcre3 \
 		librecode0 \
-		libmysqlclient-dev \
+		default-libmysqlclient-dev \
 		libsqlite3-0 \
 		libxml2 \
 	&& apt-get clean \
@@ -27,7 +40,7 @@ RUN set -x \
 
 
 # phpize deps
-RUN set -x \
+RUN set -eux \
 	&& apt-get update && apt-get install -y --no-install-recommends \
 		autoconf \
 		file \
@@ -43,41 +56,69 @@ RUN set -x \
 
 
 # compile openssl, otherwise --with-openssl won't work
-RUN set -x \
+RUN set -eux \
 	&& OPENSSL_VERSION="1.0.2g" \
 	&& cd /tmp \
 	&& mkdir openssl \
-	&& curl -sL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
-	&& curl -sL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
+	&& update-ca-certificates \
+	&& curl -skL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
+	&& curl -skL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
 	&& tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
 	&& cd /tmp/openssl \
-	&& ./config && make && make install \
+	#\
+	## Fix curl lib location from '/usr/include/x86_64-linux-gnu/curl' to '/usr/include/curl'
+	#&& if [ "$(dirname $(dirname $(find / -name 'easy.h')))" != "/usr/include" ]; then \
+	#	ln -s "$(dirname $(dirname $(find / -name 'easy.h')))/curl" /usr/include/curl; \
+	#fi \
+	#\
+	## Fix cdefs.h
+	#&& if [ "$(dirname $(dirname $(find / -name 'cdefs.h')))" != "/usr/include" ]; then \
+	#	ln -s "$(dirname $(dirname $(find / -name 'cdefs.h')))/sys" /usr/include/sys; \
+	#fi \
+	#\
+	## Fix wordsize.h
+	#&& if [ "$(dirname $(dirname $(find / -name 'wordsize.h')))" != "/usr/include" ]; then \
+	#	ln -s "$(dirname $(dirname $(find / -name 'wordsize.h')))/bits" /usr/include/bits; \
+	#fi \
+	#\
+	## Fix stubs.h
+	#&& if [ "$(dirname $(dirname $(find / -name 'stubs.h')))" != "/usr/include" ]; then \
+	#	ln -s "$(dirname $(dirname $(find / -name 'stubs.h')))/gnu" /usr/include/gnu; \
+	#fi \
+	#&& if [ ! -f /usr/include/gnu/stubs-64.h ]; then \
+	#	touch /usr/include/gnu/stubs-64.h; \
+	#fi \
+	#\
+	## Fix errno.h
+	#&& if [ "$(dirname $(dirname $(find / -name 'errno.h' | grep 'asm/')))" != "/usr/include" ]; then \
+	#	ln -s "$(dirname $(dirname $(find / -name 'errno.h' | grep 'asm/')))/asm" /usr/include/asm; \
+	#fi \
+	#\
+	&& ./config \
+	\
+	## Fix libs
+	#ln -s $( find /usr/lib/ -type d -name '*-linux-*' | grep -vE '(/.*){4}' )/*	/usr/lib/ || true \
+	\
+	&& if [ ! -f /usr/include/libio.h ]; then \
+		ln -s /usr/include/libio.h /usr/include/bio.h; \
+	fi \
+	\
+	&& make -j"$(nproc)" \
+	&& make install \
 	&& rm -rf /tmp/openssl*
 
 
 # php 5.2 needs older autoconf
-RUN set -x \
-	&& buildDeps=" \
-		autoconf2.13 \
-		libbison-dev \
-		libcurl4-openssl-dev \
-		libfl-dev \
-		libmysqlclient-dev \
-		libpcre3-dev \
-		libreadline6-dev \
-		librecode-dev \
-		libsqlite3-dev \
-		libssl-dev \
-		libxml2-dev \
-		patch \
-	" \
+RUN set -eux \
 	&& set -x \
-	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/*
+	&& apt-get update \
+	&& apt-get install -y ${BUILD_DEPS} --no-install-recommends \
+	&& rm -rf /var/lib/apt/lists/*
 
 
 # Copy and apply patches to PHP
 COPY data/php-${PHP_VERSION}*.patch /tmp/
-RUN set -x \
+RUN set -eux \
 	&& curl -SL "http://museum.php.net/php5/php-${PHP_VERSION}.tar.gz" -o /usr/src/php.tar.gz \
 	\
 # Extract artifacts
@@ -97,9 +138,17 @@ RUN set -x \
 
 
 COPY data/docker-php-source /usr/local/bin/
-RUN set -x \
+RUN set -eux \
 	&& apt update && apt install flex -y \
-	&& ln -s /usr/lib/x86_64-linux-gnu/libmysqlclient* /usr/lib/ \
+	\
+	# Fix mysqlclient lib location
+	&& ln -s $(dirname $(find /usr/lib/ -name 'libmysqlclient*' | head -1))/libmysqlclient* /usr/lib/ \
+	\
+	# Fix curl lib location from '/usr/include/x86_64-linux-gnu/curl' to '/usr/include/curl'
+	&& if [ "$(dirname $(dirname $(find / -name 'easy.h')))" != "/usr/include" ]; then \
+		ln -s "$(dirname $(dirname $(find / -name 'easy.h')))/curl" /usr/include/curl; \
+	fi \
+	\
 	&& cd /usr/src \
 	&& docker-php-source extract \
 	&& cd /usr/src/php \
@@ -128,7 +177,7 @@ RUN set -x \
 	&& make install \
 # Clean-up
 	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false ${buildDeps} \
+	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false ${BUILD_DEPS} \
 	&& make clean \
 	&& cd / \
 	&& docker-php-source delete
