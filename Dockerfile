@@ -6,6 +6,7 @@ ENV PHP_INI_DIR /usr/local/etc/php
 
 ENV BUILD_DEPS \
 		autoconf2.13 \
+		dpkg-dev \
 		libbison-dev \
 		libcurl4-openssl-dev \
 		libfl-dev \
@@ -61,8 +62,8 @@ RUN set -eux \
 	&& cd /tmp \
 	&& mkdir openssl \
 	&& update-ca-certificates \
-	&& curl -skL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
-	&& curl -skL "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
+	&& curl -sS -k -L --fail "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz \
+	&& curl -sS -k -L --fail "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
 	&& tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
 	&& cd /tmp/openssl \
 	#\
@@ -119,7 +120,7 @@ RUN set -eux \
 # Copy and apply patches to PHP
 COPY data/php-${PHP_VERSION}*.patch /tmp/
 RUN set -eux \
-	&& curl -SL "http://museum.php.net/php5/php-${PHP_VERSION}.tar.gz" -o /usr/src/php.tar.gz \
+	&& curl -sS -k -L --fail "http://museum.php.net/php5/php-${PHP_VERSION}.tar.gz" -o /usr/src/php.tar.gz \
 	\
 # Extract artifacts
 	&& tar -xf /usr/src/php.tar.gz -C /usr/src/php --strip-components=1 \
@@ -153,7 +154,11 @@ RUN set -eux \
 	&& cd /usr/src \
 	&& docker-php-source extract \
 	&& cd /usr/src/php \
+	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
+	&& debMultiarch="$(dpkg-architecture --query DEB_BUILD_MULTIARCH)" \
 	&& ./configure \
+		--host="${gnuArch}" \
+		--with-libdir="${debMultiarch}" \
 		--with-config-file-path="${PHP_INI_DIR}" \
 		--with-config-file-scan-dir="${PHP_INI_DIR}/conf.d" \
 		--with-fpm-conf="/usr/local/etc/php-fpm.conf" \
