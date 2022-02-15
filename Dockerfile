@@ -46,14 +46,17 @@ RUN set -eux \
 		dpkg-dev \
 		file \
 		g++ \
-		g++-multilib \
 		gcc \
-		gcc-multilib \
 		libc-dev \
 		make \
 		pkg-config \
 		re2c \
 		xz-utils \
+	&& if [ "$(dpkg-architecture --query DEB_HOST_ARCH)" = "i386" ]; then \
+		apt-get install -y --no-install-recommends --no-install-suggests \
+			g++-multilib \
+			gcc-multilib; \
+	fi \
 	&& apt-get clean \
 	&& rm -r /var/lib/apt/lists/*
 
@@ -68,7 +71,11 @@ RUN set -eux \
 	&& curl -sS -k -L --fail "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz.asc" -o openssl.tar.gz.asc \
 	&& tar -xzf openssl.tar.gz -C openssl --strip-components=1 \
 	&& cd /tmp/openssl \
-	&& ./config \
+	&& if [ "$(dpkg-architecture  --query DEB_HOST_ARCH)" = "i386" ]; then \
+		setarch i386 ./config -m32; \
+	else \
+		./config; \
+	fi \
 	&& make depend \
 	&& make -j"$(nproc)" \
 	&& make install \
