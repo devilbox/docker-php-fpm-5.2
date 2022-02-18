@@ -30,6 +30,8 @@ jobs:
       matrix_version: ${{ steps.set-matrix-version.outputs.matrix_version }}
       matrix_arch: ${{ steps.set-matrix-arch.outputs.matrix_arch }}
       manifest_arch: ${{ steps.set-manifest-arch.outputs.manifest }}
+    # Only run for forks (contributor)
+    if: ${{ github.event.pull_request.head.repo.fork }}
     steps:
 
       - name: "[OUTPUT] Export Matrix 'Version'"
