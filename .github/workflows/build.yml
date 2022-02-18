@@ -20,23 +20,28 @@ jobs:
   # Job (1/3): Set Build Matrix
   # -----------------------------------------------------------------------------------------------
   matrix:
-    name: Set Matrix
+    name: Configure
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.set-matrix.outputs.version }}
-      arch: ${{ steps.set-matrix.outputs.arch }}
+      version: ${{ steps.set-version.outputs.version }}
+      arch: ${{ steps.set-arch.outputs.arch }}
     steps:
-      - id: set-matrix
+      - name: Export Version
+        id: set-version
         run: |
           echo "::set-output name=version::[\"5.2\"]"
+      - name: Export Architectures
+        id: set-arch
+        run: |
           echo "::set-output name=arch::[\"linux/amd64\",\"linux/386\"]"
 
+
   # -----------------------------------------------------------------------------------------------
-  # Job (1/2): BUILD
+  # Job (1/3): BUILD
   # -----------------------------------------------------------------------------------------------
   build:
     needs: matrix
-    name: "[ PHP-${{ matrix.version }} (${{ matrix.arch }}) ]"
+    name: Build PHP-${{ matrix.version }} (${{ matrix.arch }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -45,13 +50,24 @@ jobs:
           - ${{ fromJson(needs.matrix.outputs.version) }}
         arch:
           - ${{ fromJson(needs.matrix.outputs.arch) }}
-    outputs:
-      arch: ${{ steps.out.outputs.arch }}
     steps:
-
       # ------------------------------------------------------------
       # Setup repository
       # ------------------------------------------------------------
+      - name: eval outputs1
+        run: |
+          echo "${{ needs.matrix.outputs.arch }}" | sed 's/"//g'
+      - name: eval outputs2
+        run: |
+          echo ${{ needs.matrix.outputs.arch }} | sed 's/"//g'
+
+      - name: eval outputs3
+        run: |
+          echo "${{ needs.matrix.outputs.arch }}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/ //g'
+      - name: eval outputs4
+        run: |
+          echo ${{ needs.matrix.outputs.arch }} | sed 's/\[//g' | sed 's/\]//g' | sed 's/ //g'
+
       - name: "[SETUP] Checkout repository"
         uses: actions/checkout@v2
         with:
@@ -74,9 +90,7 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make build ARCH=${ARCH}
-        env:
-          ARCH: ${{ matrix.arch }}
+            make build ARCH=${{ matrix.arch }}
 
       # ------------------------------------------------------------
       # Test
@@ -85,17 +99,13 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make test ARCH=${ARCH}
-        env:
-          ARCH: ${{ matrix.arch }}
+            make test ARCH=${{ matrix.arch }}
 
       - name: "[TEST] Update README"
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make update-readme ARCH=${ARCH}
-        env:
-          ARCH: ${{ matrix.arch }}
+            make update-readme ARCH=${{ matrix.arch }}
 
       - name: "[TEST] Verify README"
         run: |
@@ -123,9 +133,7 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make push-arch TAG=${{ steps.tag.outputs.docker-tag }} ARCH=${ARCH}
-        env:
-          ARCH: ${{ matrix.arch }}
+            make push-arch TAG=${{ steps.tag.outputs.docker-tag }} ARCH=${{ matrix.arch }}
         # https://help.github.com/en/github/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions#functions
         if: github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id
             && (
@@ -147,7 +155,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - ${{ fromJson(needs.matrix.outputs.arch) }}
+          - ${{ fromJson(needs.matrix.outputs.version) }}
     # https://help.github.com/en/github/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions#functions
     if: github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id
         && (
@@ -158,7 +166,6 @@ jobs:
           (github.event_name == 'push'     && startsWith(github.ref, 'refs/heads/release-'))
         )
     steps:
-
       # ------------------------------------------------------------
       # Setup repository
       # ------------------------------------------------------------
@@ -175,7 +182,6 @@ jobs:
         run: |
           echo "${{ fromJson(needs.matrix.outputs.arch) }}"
           echo "${{ needs.matrix.outputs.arch }}"
-          echo "${{ matrix.version }}"
 
       # ------------------------------------------------------------
       # Deploy
