@@ -12,8 +12,7 @@ name: lint
 on:
   # Runs on Pull Requests
   pull_request:
-    branches-ignore:
-      - 'dependabot/github_actions/**'
+
 
 # -------------------------------------------------------------------------------------------------
 # What to run
@@ -22,6 +21,7 @@ jobs:
   lint:
     name: "Lint"
     runs-on: ubuntu-latest
+    if: github.actor!= 'dependabot[bot]'
     steps:
       # ------------------------------------------------------------
       # Setup repository
