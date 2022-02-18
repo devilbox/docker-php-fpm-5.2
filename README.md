@@ -13,7 +13,7 @@
 
 **Available Architectures:**  `amd64`, `386`
 
--This repository will provide you a fully functional PHP-FPM 5.2.17 Docker image built from [official sources](http://museum.php.net) nightly. Additional patches have been applied to enable FPM functionality. PHP 5.2 [reached EOL](https://secure.php.net/eol.php) on 06 Jan 2011 and thus, official docker support was dropped. It provides the base for [Devilbox PHP-FPM Docker images](https://github.com/devilbox/docker-php-fpm).
+This repository will provide you a fully functional PHP-FPM 5.2.17 Docker image built from [official sources](http://museum.php.net) nightly. Additional patches have been applied to enable FPM functionality. PHP 5.2 [reached EOL](https://secure.php.net/eol.php) on 06 Jan 2011 and thus, official docker support was dropped. It provides the base for [Devilbox PHP-FPM Docker images](https://github.com/devilbox/docker-php-fpm).
 
 | Docker Hub | Upstream Project |
 |------------|------------------|
