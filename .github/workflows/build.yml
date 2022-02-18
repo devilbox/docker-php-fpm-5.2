@@ -13,61 +13,63 @@ on:
   # Runs on Push
   push:
 
+env:
+  MATRIX_VERSION: '["5.2"]'
+  MATRIX_ARCH: '["linux/amd64","linux/386"]'
+
 
 jobs:
 
   # -----------------------------------------------------------------------------------------------
-  # Job (1/3): Set Build Matrix
+  # Job (1/3): Configure Pipeline
   # -----------------------------------------------------------------------------------------------
-  matrix:
+  configure:
     name: Configure
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.set-version.outputs.version }}
-      arch: ${{ steps.set-arch.outputs.arch }}
+      matrix_version: ${{ steps.set-matrix-version.outputs.matrix_version }}
+      matrix_arch: ${{ steps.set-matrix-arch.outputs.matrix_arch }}
+      manifest_arch: ${{ steps.set-manifest-arch.outputs.manifest }}
     steps:
-      - name: Export Version
-        id: set-version
+
+      - name: "[OUTPUT] Export Matrix 'Version'"
+        id: set-matrix-version
         run: |
-          echo "::set-output name=version::[\"5.2\"]"
-      - name: Export Architectures
-        id: set-arch
+          echo '::set-output name=matrix_version::${{ env.MATRIX_VERSION }}'
+          echo "${{ env.MATRIX_VERSION }}"
+
+      - name: "[OUTPUT] Export Matrix 'Arch'"
+        id: set-matrix-arch
         run: |
-          echo "::set-output name=arch::[\"linux/amd64\",\"linux/386\"]"
+          echo '::set-output name=matrix_arch::${{ env.MATRIX_ARCH }}'
+          echo "${{ env.MATRIX_ARCH }}"
+
+      - name: "[OUTPUT] Export Manifest 'Arch'"
+        id: set-manifest-arch
+        run: |
+          ARCH="$( echo ${{ env.MATRIX_ARCH }} | sed 's/"//g' | sed 's/\[//g' | sed 's/\]//g' | sed 's/ //g' )"
+          echo "::set-output name=manifest::${ARCH}"
+          echo "${ARCH}"
 
 
   # -----------------------------------------------------------------------------------------------
-  # Job (1/3): BUILD
+  # Job (2/3): BUILD
   # -----------------------------------------------------------------------------------------------
   build:
-    needs: matrix
+    needs: configure
     name: Build PHP-${{ matrix.version }} (${{ matrix.arch }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         version:
-          - ${{ fromJson(needs.matrix.outputs.version) }}
+          - ${{ fromJson(needs.configure.outputs.matrix_version) }}
         arch:
-          - ${{ fromJson(needs.matrix.outputs.arch) }}
+          - ${{ fromJson(needs.configure.outputs.matrix_arch) }}
     steps:
       # ------------------------------------------------------------
       # Setup repository
       # ------------------------------------------------------------
-      - name: eval outputs1
-        run: |
-          echo "${{ needs.matrix.outputs.arch }}" | sed 's/"//g'
-      - name: eval outputs2
-        run: |
-          echo ${{ needs.matrix.outputs.arch }} | sed 's/"//g'
-
-      - name: eval outputs3
-        run: |
-          echo "${{ needs.matrix.outputs.arch }}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/ //g'
-      - name: eval outputs4
-        run: |
-          echo ${{ needs.matrix.outputs.arch }} | sed 's/\[//g' | sed 's/\]//g' | sed 's/ //g'
-
       - name: "[SETUP] Checkout repository"
         uses: actions/checkout@v2
         with:
@@ -145,17 +147,17 @@ jobs:
             )
 
   # -----------------------------------------------------------------------------------------------
-  # Job (2/2): DEPLOY
+  # Job (3/3): DEPLOY
   # -----------------------------------------------------------------------------------------------
   deploy:
-    needs: [matrix, build]
+    needs: [configure, build]
     name: Deploy
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         version:
-          - ${{ fromJson(needs.matrix.outputs.version) }}
+          - ${{ fromJson(needs.configure.outputs.matrix_version) }}
     # https://help.github.com/en/github/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions#functions
     if: github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id
         && (
@@ -178,11 +180,6 @@ jobs:
         id: tag
         uses: cytopia/docker-tag-action@v0.4.7
 
-      - name: "[SETUP] Determine Inputs"
-        run: |
-          echo "${{ fromJson(needs.matrix.outputs.arch) }}"
-          echo "${{ needs.matrix.outputs.arch }}"
-
       # ------------------------------------------------------------
       # Deploy
       # ------------------------------------------------------------
@@ -196,7 +193,7 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make manifest-create TAG=${{ steps.tag.outputs.docker-tag }} ARCH="linux/amd64,linux/386"
+            make manifest-create TAG=${{ steps.tag.outputs.docker-tag }} ARCH="${{ needs.configure.outputs.manifest_arch }}"
 
       - name: "[DEPLOY] Publish Docker manifest"
         uses: cytopia/shell-command-retry-action@v0.1.2
