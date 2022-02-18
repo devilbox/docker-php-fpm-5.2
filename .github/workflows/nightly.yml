@@ -36,7 +36,7 @@ jobs:
           #- 'linux/arm/v6'
         refs:
           - 'master'
-          - '0.20'
+          - '0.21'
     steps:
 
       # ------------------------------------------------------------
@@ -100,6 +100,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        # https://help.github.com/en/github/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions#functions
+        if: github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id
+            && (
+              (github.event_name == 'schedule' && (github.ref == 'refs/heads/master'   || startsWith(github.ref, 'refs/tags/')))
+              ||
+              (github.event_name == 'push'     && (github.ref == 'refs/heads/master'   || startsWith(github.ref, 'refs/tags/')))
+              ||
+              (github.event_name == 'push'     && startsWith(github.ref, 'refs/heads/release-'))
+            )
 
       - name: "[DEPLOY] Publish architecture image (only repo owner)"
         uses: cytopia/shell-command-retry-action@v0.1
@@ -132,7 +141,7 @@ jobs:
           - '5.2'
         refs:
           - 'master'
-          - '0.20'
+          - '0.21'
     steps:
 
       # ------------------------------------------------------------
@@ -156,6 +165,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        # https://help.github.com/en/github/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions#functions
+        if: github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id
+            && (
+              (github.event_name == 'schedule' && (github.ref == 'refs/heads/master'   || startsWith(github.ref, 'refs/tags/')))
+              ||
+              (github.event_name == 'push'     && (github.ref == 'refs/heads/master'   || startsWith(github.ref, 'refs/tags/')))
+              ||
+              (github.event_name == 'push'     && startsWith(github.ref, 'refs/heads/release-'))
+            )
 
       - name: "[DEPLOY] Create Docker manifest"
         uses: cytopia/shell-command-retry-action@v0.1

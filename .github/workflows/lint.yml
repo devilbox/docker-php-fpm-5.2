@@ -12,7 +12,8 @@ name: lint
 on:
   # Runs on Pull Requests
   pull_request:
-
+    branches-ignore:
+      - 'dependabot/github_actions/**'
 
 # -------------------------------------------------------------------------------------------------
 # What to run
