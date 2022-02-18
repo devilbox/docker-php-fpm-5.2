@@ -33,6 +33,8 @@ jobs:
           #- 'linux/arm64'
           #- 'linux/arm/v7'
           #- 'linux/arm/v6'
+    outputs:
+      arch: ${{ steps.out.outputs.arch }}
     steps:
 
       # ------------------------------------------------------------
@@ -52,6 +54,11 @@ jobs:
       - name: "[SETUP] Determine Docker tag"
         id: tag
         uses: cytopia/docker-tag-action@v0.4.7
+
+      - name: "[SETUP] Set Outputs"
+        id: out
+        run: |
+          echo "::set-output name=arch::${{ matrix.arch }}"
 
       # ------------------------------------------------------------
       # Build
@@ -156,6 +163,10 @@ jobs:
       - name: "[SETUP] Determine Docker tag"
         id: tag
         uses: cytopia/docker-tag-action@v0.4.7
+
+      - name: "[SETUP] Determine Inputs"
+        run: |
+          echo "${{ needs.build.outputs.arch }}"
 
       # ------------------------------------------------------------
       # Deploy
