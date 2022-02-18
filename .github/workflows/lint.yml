@@ -21,7 +21,7 @@ jobs:
   lint:
     name: "Lint"
     runs-on: ubuntu-latest
-    if: github.actor!= 'dependabot[bot]'
+    if: github.actor!= 'dependabot'
     steps:
       # ------------------------------------------------------------
       # Setup repository
