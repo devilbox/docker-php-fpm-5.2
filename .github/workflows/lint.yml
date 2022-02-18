@@ -32,7 +32,6 @@ jobs:
           fetch-depth: 0
 
       - name: Output info
-        id: vars
         run: |
           echo "${{ github.actor }}"
 
@@ -40,6 +39,5 @@ jobs:
       # Lint repository
       # ------------------------------------------------------------
       - name: Lint workflow
-        id: vars
         run: |
           make lint-workflow
