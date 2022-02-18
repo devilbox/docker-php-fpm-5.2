@@ -17,22 +17,34 @@ on:
 jobs:
 
   # -----------------------------------------------------------------------------------------------
+  # Job (1/3): Set Build Matrix
+  # -----------------------------------------------------------------------------------------------
+  matrix:
+    name: Set Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-matrix.outputs.version }}
+      arch: ${{ steps.set-matrix.outputs.arch }}
+    steps:
+      - id: set-matrix
+        run: |
+          echo "::set-output name=version::[\"5.2\"]"
+          echo "::set-output name=arch::[\"linux/amd64\",\"linux/386\"]"
+
+  # -----------------------------------------------------------------------------------------------
   # Job (1/2): BUILD
   # -----------------------------------------------------------------------------------------------
   build:
+    needs: matrix
     name: "[ PHP-${{ matrix.version }} (${{ matrix.arch }}) ]"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         version:
-          - '5.2'
+          - ${{ fromJson(needs.matrix.outputs.version) }}
         arch:
-          - 'linux/amd64'
-          - 'linux/386'
-          #- 'linux/arm64'
-          #- 'linux/arm/v7'
-          #- 'linux/arm/v6'
+          - ${{ fromJson(needs.matrix.outputs.arch) }}
     outputs:
       arch: ${{ steps.out.outputs.arch }}
     steps:
@@ -54,11 +66,6 @@ jobs:
       - name: "[SETUP] Determine Docker tag"
         id: tag
         uses: cytopia/docker-tag-action@v0.4.7
-
-      - name: "[SETUP] Set Outputs"
-        id: out
-        run: |
-          echo "::set-output name=arch::${{ matrix.arch }}"
 
       # ------------------------------------------------------------
       # Build
@@ -133,14 +140,14 @@ jobs:
   # Job (2/2): DEPLOY
   # -----------------------------------------------------------------------------------------------
   deploy:
-    needs: [build]
+    needs: [matrix, build]
     name: Deploy
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         version:
-          - '5.2'
+          - ${{ fromJson(needs.matrix.outputs.arch) }}
     # https://help.github.com/en/github/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions#functions
     if: github.event.pull_request.base.repo.id == github.event.pull_request.head.repo.id
         && (
@@ -166,7 +173,9 @@ jobs:
 
       - name: "[SETUP] Determine Inputs"
         run: |
-          echo "${{ needs.build.outputs.arch }}"
+          echo "${{ fromJson(needs.matrix.outputs.arch) }}"
+          echo "${{ needs.matrix.outputs.arch }}"
+          echo "${{ matrix.version }}"
 
       # ------------------------------------------------------------
       # Deploy
