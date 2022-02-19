@@ -19,6 +19,33 @@ env:
 
 
 jobs:
+  environment:
+    name: Environment
+    runs-on: ubuntu-latest
+    outputs:
+      matrix_version: ${{ steps.set-matrix-version.outputs.matrix_version }}
+      matrix_arch: ${{ steps.set-matrix-arch.outputs.matrix_arch }}
+    steps:
+      - name: "[OUTPUT] Export Matrix 'Version'"
+        id: set-matrix-version
+        run: |
+          echo '::set-output name=matrix_version::${{ env.MATRIX_VERSION }}'
+          echo "${{ env.MATRIX_VERSION }}"
+      - name: "[OUTPUT] Export Matrix 'Arch'"
+        id: set-matrix-arch
+        run: |
+          echo '::set-output name=matrix_arch::${{ env.MATRIX_ARCH }}'
+          echo "${{ env.MATRIX_ARCH }}"
+  build_job:
+    needs: [environment]
+    uses: devilbox/github-actions/.github/workflows/build-multi-arch.yml@master
+    with:
+      version: ${{ needs.environment.outputs.matrix_version }}
+      arch: ${{ needs.environment.outputs.matrix_arch }}
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
 
   # -----------------------------------------------------------------------------------------------
   # Job (1/3): Configure Pipeline
