@@ -48,11 +48,9 @@ lint-workflow:
 	GIT_CURR_MAJOR="$$( git tag | sort -V | tail -1 | sed 's|\.[0-9]*$$||g' )"; \
 	GIT_CURR_MINOR="$$( git tag | sort -V | tail -1 | sed 's|^[0-9]*\.||g' )"; \
 	GIT_NEXT_TAG="$${GIT_CURR_MAJOR}.$$(( GIT_CURR_MINOR + 1 ))"; \
-	grep 'refs:' -A 20 .github/workflows/nightly.yml \
-	| grep '^          -' \
-	| grep -v master \
+	grep '^  MATRIX_REFS:' .github/workflows/nightly.yml | grep -Eo '\[.*\]' \
 	| while read -r i; do \
-		if ! echo "$${i}" | grep -- "- '$${GIT_NEXT_TAG}'" >/dev/null; then \
+		if ! echo "$${i}" | grep -- "\"$${GIT_NEXT_TAG}\"" >/dev/null; then \
 			echo "[ERR] New Tag required in .github/workflows/nightly.yml: $${GIT_NEXT_TAG}"; \
 			exit 1; \
 		else \
@@ -98,7 +96,11 @@ manifest-push:
 #  Test Targets
 # -------------------------------------------------------------------------------------------------
 .PHONY: test
-test:
+test: _test-integration
+test: update-readme
+
+.PHONY: _test-integration
+_test-integration:
 	./tests/test.sh $(IMAGE) $(ARCH)
 
 .PHONY: update-readme
