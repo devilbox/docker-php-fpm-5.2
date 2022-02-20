@@ -57,7 +57,7 @@ jobs:
           echo "${{ env.MATRIX_REFS }}"
   docker:
     needs: [environment]
-    uses: devilbox/github-actions/.github/workflows/docker-build-multi-arch.yml@master
+    uses: devilbox/github-actions/.github/workflows/docker-build-multi-arch.yml@v0.1.0
     with:
       # Only run for forks
       enabled: ${{ github.event.pull_request.head.repo.fork }}

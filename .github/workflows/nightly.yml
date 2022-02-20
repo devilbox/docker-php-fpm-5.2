@@ -59,7 +59,7 @@ jobs:
           echo "${{ env.MATRIX_REFS }}"
   docker:
     needs: [environment]
-    uses: devilbox/github-actions/.github/workflows/docker-build-multi-arch.yml@master
+    uses: devilbox/github-actions/.github/workflows/docker-build-multi-arch.yml@v0.1.0
     with:
       enabled: true
       name: ${{ needs.environment.outputs.name }}
