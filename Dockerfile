@@ -102,7 +102,7 @@ RUN set -eux \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-libxml2.patch \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-openssl.patch \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-fpm.patch \
-	&& patch -p0 < /tmp/php-${PHP_VERSION}-curl.patch || true \
+	&& (patch -p0 < /tmp/php-${PHP_VERSION}-curl.patch || true) \
 # Create php.tar.xz
 	&& cd /usr/src \
 	&& tar -cJf php.tar.xz php \
