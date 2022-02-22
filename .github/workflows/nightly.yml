@@ -22,7 +22,7 @@ env:
   NAME: PHP
   MATRIX_VERSION: '["5.2"]'
   MATRIX_ARCH: '["linux/amd64","linux/386"]'
-  MATRIX_REFS: '["master","0.26"]'
+  MATRIX_REFS: '["master","0.27"]'
 
 
 jobs:
