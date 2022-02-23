@@ -24,7 +24,7 @@ env:
 
 
 jobs:
-  # TODO: This pre-flight setup will be obsolete as soon as this issue has been fixed
+  # TODO: This pre-flight setup will be obsolete as soon as this issue has been fixed:
   # https://github.com/actions/runner/issues/480
   environment:
     name: Environment
