@@ -12,13 +12,7 @@ name: build
 on:
   # Runs on Push
   push:
-    branches:
-      - 'main'
-      - 'master'
-      - 'releases/**'
-      - 'releases-*'
-  release:
-    types: [published]
+
 
 ###
 ### Generic configuration
