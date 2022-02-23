@@ -40,23 +40,7 @@ help:
 #  Lint Targets
 # -------------------------------------------------------------------------------------------------
 .PHONY: lint
-lint: lint-workflow
-
-.PHONY: lint-workflow
-lint-workflow:
-	@\
-	GIT_CURR_MAJOR="$$( git tag | sort -V | tail -1 | sed 's|\.[0-9]*$$||g' )"; \
-	GIT_CURR_MINOR="$$( git tag | sort -V | tail -1 | sed 's|^[0-9]*\.||g' )"; \
-	GIT_NEXT_TAG="$${GIT_CURR_MAJOR}.$$(( GIT_CURR_MINOR + 1 ))"; \
-	grep '^  MATRIX_REFS:' .github/workflows/nightly.yml | grep -Eo '\[.*\]' \
-	| while read -r i; do \
-		if ! echo "$${i}" | grep -- "\"$${GIT_NEXT_TAG}\"" >/dev/null; then \
-			echo "[ERR] New Tag required in .github/workflows/nightly.yml: $${GIT_NEXT_TAG}"; \
-			exit 1; \
-		else \
-			echo "[OK] Git Tag present in .github/workflows/nightly.yml: $${GIT_NEXT_TAG}"; \
-		fi \
-	done
+	@echo "No linting defined."
 
 
 # -------------------------------------------------------------------------------------------------
