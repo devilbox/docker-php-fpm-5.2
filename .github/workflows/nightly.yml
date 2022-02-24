@@ -43,7 +43,7 @@ jobs:
           echo "${{ env.NAME }}"
       - name: "[OUTPUT] Export Matrix 'Refs' with master and latest tag"
         id: set-matrix-refs
-        uses: cytopia/git-ref-matrix-action@v0.1.1
+        uses: cytopia/git-ref-matrix-action@v0.1.2
         with:
           repository_default_branch: master
           branches: master
