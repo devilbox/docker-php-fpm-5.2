@@ -1,0 +1,92 @@
+---
+
+# -------------------------------------------------------------------------------------------------
+# Job Name
+# -------------------------------------------------------------------------------------------------
+name: params
+
+
+# -------------------------------------------------------------------------------------------------
+# When to run
+# -------------------------------------------------------------------------------------------------
+on:
+  workflow_call:
+    outputs:
+      name:
+        description: "The project name"
+        value: ${{ jobs.params.outputs.name }}
+      matrix_version:
+        description: "The determined version matrix"
+        value: ${{ jobs.params.outputs.matrix_version }}
+      matrix_arch:
+        description: "The determined architecture matrix"
+        value: ${{ jobs.params.outputs.matrix_arch }}
+      matrix_refs:
+        description: "The determined git ref matrix (only during scheduled run)"
+        value: ${{ jobs.params.outputs.matrix_refs }}
+
+###
+### Generic configuration
+###
+env:
+  NAME: PHP
+  MATRIX_VERSION: '["5.2"]'
+  MATRIX_ARCH: '["linux/amd64","linux/386"]'
+
+
+jobs:
+  params:
+    runs-on: ubuntu-latest
+
+    outputs:
+      name: ${{ steps.set-name.outputs.name }}
+      matrix_version: ${{ steps.set-matrix-version.outputs.matrix }}
+      matrix_arch: ${{ steps.set-matrix-arch.outputs.matrix }}
+      matrix_refs: ${{ steps.set-matrix-refs.outputs.matrix }}
+
+    steps:
+      - name: "Set Name"
+        id: set-name
+        run: |
+          echo '::set-output name=name::${{ env.NAME }}'
+
+      - name: "Set Matrix 'Version'"
+        id: set-matrix-version
+        run: |
+          echo '::set-output name=matrix::${{ env.MATRIX_VERSION }}'
+
+      - name: "Set Matrix 'Arch'"
+        id: set-matrix-arch
+        run: |
+          echo '::set-output name=matrix::${{ env.MATRIX_ARCH }}'
+
+      - name: "Set Matrix 'Refs' (master branch and latest tag)"
+        id: set-matrix-refs
+        uses: cytopia/git-ref-matrix-action@v0.1.1
+        with:
+          repository_default_branch: master
+          branches: master
+          num_latest_tags: 1
+        if: github.event_name == 'schedule'
+
+      - name: "Show settings'"
+        run: |
+          echo 'Name'
+          echo '--------------------'
+          echo ${{ steps.set-name.outputs.name }}
+          echo
+
+          echo 'Matrix: Version'
+          echo '--------------------'
+          echo ${{ steps.set-matrix-version.outputs.matrix }}
+          echo
+
+          echo 'Matrix: Arch'
+          echo '--------------------'
+          echo ${{ steps.set-matrix-arch.outputs.matrix }}
+          echo
+
+          echo 'Matrix: Refs'
+          echo '--------------------'
+          echo ${{ steps.set-matrix-refs.outputs.matrix }}
+          echo
