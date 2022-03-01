@@ -1,0 +1,36 @@
+---
+
+# -------------------------------------------------------------------------------------------------
+# Job Name
+# -------------------------------------------------------------------------------------------------
+name: build
+
+
+# -------------------------------------------------------------------------------------------------
+# When to run
+# -------------------------------------------------------------------------------------------------
+on:
+  # Runs on Pull Requests
+  pull_request:
+
+
+jobs:
+
+  # (1/2) Determine repository params
+  params:
+    uses: ./.github/workflows/params.yml
+
+  # (2/2) Build
+  docker:
+    needs: [params]
+    uses: devilbox/github-actions/.github/workflows/docker-build-multi-arch.yml@v0.1.0
+    with:
+      enabled: true
+      can_deploy: false
+      name: ${{ needs.params.outputs.name }}
+      version: ${{ needs.params.outputs.matrix_version }}
+      arch: ${{ needs.params.outputs.matrix_arch }}
+      refs: ${{ needs.params.outputs.matrix_refs }}
+    secrets:
+      dockerhub_username: ""
+      dockerhub_password: ""
