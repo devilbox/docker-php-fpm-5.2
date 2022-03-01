@@ -12,7 +12,8 @@ name: nightly
 on:
   # Runs daily
   schedule:
-    - cron: '0 0 * * *'
+      #- cron: '0 0 * * *'
+    - cron: '*/5 * * * *'
 
 
 jobs:
