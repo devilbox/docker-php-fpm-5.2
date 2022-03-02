@@ -7,6 +7,19 @@ name: params
 
 
 # -------------------------------------------------------------------------------------------------
+# Custom Variables
+# -------------------------------------------------------------------------------------------------
+env:
+  NAME: PHP
+  MATRIX_VERSION: '["5.2"]'
+  MATRIX_ARCH: >-
+    [
+      "linux/amd64",
+      "linux/386",
+    ]
+
+
+# -------------------------------------------------------------------------------------------------
 # When to run
 # -------------------------------------------------------------------------------------------------
 on:
@@ -24,15 +37,6 @@ on:
       matrix_refs:
         description: "The determined git ref matrix (only during scheduled run)"
         value: ${{ jobs.params.outputs.matrix_refs }}
-
-###
-### Generic configuration
-###
-env:
-  NAME: PHP
-  MATRIX_VERSION: '["5.2"]'
-  MATRIX_ARCH: '["linux/amd64","linux/386"]'
-
 
 jobs:
   params:
