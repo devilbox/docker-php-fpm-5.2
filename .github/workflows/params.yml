@@ -17,12 +17,16 @@ env:
       {
         "NAME": "PHP",
         "VERSION": "5.2"
+      },
+      {
+        "NAME": "PHP",
+        "VERSION": "5.3"
       }
     ]
   MATRIX_ARCH: >-
     [
       "linux/amd64",
-      "linux/386",
+      "linux/386"
     ]
 
 
@@ -58,7 +62,7 @@ jobs:
     steps:
       - name: Test JSON
         run: |
-            echo toJSON(${{ env.VERSION }})
+          jq --argjson arches '${{ env.MATRIX_ARCH }}' 'map({NAME:.NAME,VERSION,ARCH:$arches[]})' <<<'${{ env.MATRIX_VERSION }}'
 
       - name: "Set Name"
         id: set-name
