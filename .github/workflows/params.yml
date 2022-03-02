@@ -11,7 +11,14 @@ name: params
 # -------------------------------------------------------------------------------------------------
 env:
   NAME: PHP
-  MATRIX_VERSION: '["5.2"]'
+  #MATRIX_VERSION: '["5.2"]'
+  MATRIX_VERSION: >-
+    [
+      {
+        "NAME": "PHP",
+        "VERSION": "5.2"
+      }
+    ]
   MATRIX_ARCH: >-
     [
       "linux/amd64",
@@ -49,6 +56,10 @@ jobs:
       matrix_refs: ${{ steps.set-matrix-refs.outputs.matrix }}
 
     steps:
+      - name: JSON
+        run: |
+            echo toJSON(${{ env.VERSION }})
+
       - name: "Set Name"
         id: set-name
         run: |
