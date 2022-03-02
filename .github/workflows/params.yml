@@ -56,7 +56,7 @@ jobs:
       matrix_refs: ${{ steps.set-matrix-refs.outputs.matrix }}
 
     steps:
-      - name: JSON
+      - name: Test JSON
         run: |
             echo toJSON(${{ env.VERSION }})
 
