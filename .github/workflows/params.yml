@@ -11,16 +11,11 @@ name: params
 # -------------------------------------------------------------------------------------------------
 env:
   NAME: PHP
-  #MATRIX_VERSION: '["5.2"]'
   MATRIX_VERSION: >-
     [
       {
         "NAME": "PHP",
         "VERSION": "5.2"
-      },
-      {
-        "NAME": "PHP",
-        "VERSION": "5.3"
       }
     ]
   MATRIX_ARCH: >-
@@ -62,24 +57,26 @@ jobs:
     steps:
       - name: Test JSON
         run: |
-          jq --argjson arches '${{ env.MATRIX_ARCH }}' 'map({NAME:.NAME,VERSION,ARCH:$arches[]})' <<<'${{ env.MATRIX_VERSION }}'
+          jq -M -c \
+            --argjson arches '${{ env.MATRIX_ARCH }}' \
+            'map({NAME:.NAME, VERSION, ARCH:$arches[]})' <<<'${{ env.MATRIX_VERSION }}'
 
       - name: "Set Name"
         id: set-name
         run: |
           echo '::set-output name=name::${{ env.NAME }}'
 
-      - name: "Set Matrix 'Version'"
+      - name: "[Set-Output] Matrix 'Version'"
         id: set-matrix-version
         run: |
-          echo '::set-output name=matrix::${{ env.MATRIX_VERSION }}'
+          echo "::set-output name=matrix::$( echo '${{ env.MATRIX_VERSION }}' | jq -M -c )"
 
-      - name: "Set Matrix 'Arch'"
+      - name: "[Set-Output] Matrix 'Arch'"
         id: set-matrix-arch
         run: |
-          echo '::set-output name=matrix::${{ env.MATRIX_ARCH }}'
+          echo "::set-output name=matrix::$( echo '${{ env.MATRIX_ARCH }}' | jq -M -c )"
 
-      - name: "Set Matrix 'Refs' (master branch and latest tag)"
+      - name: "[Set-Output] Matrix 'Refs' (master branch and latest tag)"
         id: set-matrix-refs
         uses: cytopia/git-ref-matrix-action@v0.1.2
         with:
@@ -88,24 +85,24 @@ jobs:
           num_latest_tags: 1
         if: github.event_name == 'schedule'
 
-      - name: "Show settings'"
+      - name: "[DEBUG] Show settings'"
         run: |
           echo 'Name'
           echo '--------------------'
-          echo ${{ steps.set-name.outputs.name }}
+          echo '${{ steps.set-name.outputs.name }}'
           echo
 
           echo 'Matrix: Version'
           echo '--------------------'
-          echo ${{ steps.set-matrix-version.outputs.matrix }}
+          echo '${{ steps.set-matrix-version.outputs.matrix }}'
           echo
 
           echo 'Matrix: Arch'
           echo '--------------------'
-          echo ${{ steps.set-matrix-arch.outputs.matrix }}
+          echo '${{ steps.set-matrix-arch.outputs.matrix }}'
           echo
 
           echo 'Matrix: Refs'
           echo '--------------------'
-          echo ${{ steps.set-matrix-refs.outputs.matrix }}
+          echo '${{ steps.set-matrix-refs.outputs.matrix }}'
           echo
