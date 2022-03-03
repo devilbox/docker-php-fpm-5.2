@@ -11,8 +11,7 @@ name: build
 # -------------------------------------------------------------------------------------------------
 on:
   # Runs on Pull Requests
-  pull_request:
-      #pull_request_target:
+  pull_request_target:
 
 
 jobs:

@@ -28,6 +28,7 @@ FILE    = Dockerfile
 TAG     = latest
 ARCH    = linux/amd64
 
+FL_IGNORES  = .git/,.github/,tests/,data/
 
 # -------------------------------------------------------------------------------------------------
 #  Default Target
