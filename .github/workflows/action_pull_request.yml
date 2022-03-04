@@ -28,9 +28,8 @@ jobs:
       enabled: true
       can_deploy: false
       name: ${{ needs.params.outputs.name }}
-      matrix_version: ${{ needs.params.outputs.matrix_version }}
-      matrix_arch: ${{ needs.params.outputs.matrix_arch }}
-      matrix_refs: ${{ needs.params.outputs.matrix_refs }}
+      matrix: ${{ needs.params.outputs.matrix }}
+      refs: ${{ needs.params.outputs.refs }}
     secrets:
       dockerhub_username: ""
       dockerhub_password: ""
