@@ -20,15 +20,21 @@ include $(MAKEFILES)
 # -------------------------------------------------------------------------------------------------
 # Default configuration
 # -------------------------------------------------------------------------------------------------
-NAME    = PHP
-VERSION = 5.2
-IMAGE   = devilbox/php-fpm-5.2
-DIR     = .
-FILE    = Dockerfile
-TAG     = latest
-ARCH    = linux/amd64
+# Own vars
+TAG        = latest
 
+# Makefile.docker overwrites
+NAME       = PHP
+VERSION    = 5.2
+IMAGE      = devilbox/php-fpm-5.2
+DIR        = .
+FILE       = Dockerfile
+DOCKER_TAG = $(TAG)
+ARCH       = linux/amd64
+
+# Makefile.lint overwrites
 FL_IGNORES  = .git/,.github/,tests/,data/
+
 
 # -------------------------------------------------------------------------------------------------
 #  Default Target
