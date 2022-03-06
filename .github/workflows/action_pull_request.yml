@@ -10,8 +10,7 @@ name: build
 # When to run
 # -------------------------------------------------------------------------------------------------
 on:
-  # Runs on Pull Requests
-  pull_request_target:
+  pull_request:
 
 
 jobs:
@@ -19,6 +18,8 @@ jobs:
   # (1/2) Determine repository params
   params:
     uses: ./.github/workflows/params.yml
+    # Only run for forks (contributor)
+    if: github.event.pull_request.head.repo.fork
 
   # (2/2) Build
   docker:
