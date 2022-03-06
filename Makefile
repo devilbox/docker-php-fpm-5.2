@@ -95,3 +95,4 @@ update-readme:
 		| perl -0 -pe "s/<!-- modules -->.*<!-- \/modules -->/<!-- modules -->\n$$(./tests/get-modules.sh $(IMAGE) $(ARCH))\n<!-- \/modules -->/s" \
 		> "./README.md.tmp"
 	yes | mv -f "./README.md.tmp" "./README.md"
+	git diff --quiet || { echo "Build Changes"; git diff; git status; false; }
