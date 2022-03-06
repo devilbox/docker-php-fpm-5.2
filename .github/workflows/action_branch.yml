@@ -10,13 +10,8 @@ name: build
 # When to run
 # -------------------------------------------------------------------------------------------------
 on:
-  # Runs after merge to master and after tag creation
   push:
-    branches:
-      - master
-      - release-*
-    tags:
-      - '*'
+
 
 jobs:
 
@@ -30,7 +25,7 @@ jobs:
     uses: devilbox/github-actions/.github/workflows/docker-name-version-arch.yml@master
     with:
       enabled: true
-      can_deploy: true
+      can_deploy: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/release-') }}
       name: ${{ needs.params.outputs.name }}
       matrix: ${{ needs.params.outputs.matrix }}
       refs: ${{ needs.params.outputs.refs }}
