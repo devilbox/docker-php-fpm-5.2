@@ -87,12 +87,12 @@ test: update-readme
 
 .PHONY: _test-integration
 _test-integration:
-	./tests/test.sh $(IMAGE) $(ARCH)
+	./tests/start-ci.sh $(IMAGE) $(NAME) $(VERSION) $(DOCKER_TAG) $(ARCH)
 
 .PHONY: update-readme
 update-readme:
 	cat "./README.md" \
-		| perl -0 -pe "s/<!-- modules -->.*<!-- \/modules -->/<!-- modules -->\n$$(./tests/get-modules.sh $(IMAGE) $(ARCH))\n<!-- \/modules -->/s" \
+		| perl -0 -pe "s/<!-- modules -->.*<!-- \/modules -->/<!-- modules -->\n$$(./tests/get-modules.sh $(IMAGE) $(NAME) $(VERSION) $(DOCKER_TAG) $(ARCH))\n<!-- \/modules -->/s" \
 		> "./README.md.tmp"
 	yes | mv -f "./README.md.tmp" "./README.md"
 	git diff --quiet || { echo "Build Changes"; git diff; git status; false; }

@@ -2,8 +2,13 @@
 set -eu
 set -o pipefail
 
-CONT_PHP="${1}"
-ARCH="${2}"
+IMAGE="${1}"
+#NAME="${2}"
+#VERSION="${3}"
+TAG="${4}"
+ARCH="${5}"
+
+
 
 ###
 ### Variables
@@ -72,7 +77,7 @@ chmod 0644 "${DOC_ROOT_HOST}/error.php"
 ###
 ### Start containers
 ###
-PHP_DID="$( docker run -d --platform "${ARCH}" --name "${NAME_PHP}" -v "${DOC_ROOT_HOST}:${DOC_ROOT_CONT}" "${CONT_PHP}" )"
+PHP_DID="$( docker run -d --platform "${ARCH}" --name "${NAME_PHP}" -v "${DOC_ROOT_HOST}:${DOC_ROOT_CONT}" "${IMAGE}:${TAG}" )"
 sleep 4
 WEB_DID="$( docker run -d --platform "${ARCH}" --name "${NAME_WEB}" -v "${DOC_ROOT_HOST}:${DOC_ROOT_CONT}" -v "${CONFIG_HOST}:${CONFIG_CONT}" -p "${WWW_PORT}:80" --link "${NAME_PHP}" "${CONT_WEB}" )"
 sleep 4
