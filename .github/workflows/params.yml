@@ -10,14 +10,12 @@ name: params
 # Custom Variables
 # -------------------------------------------------------------------------------------------------
 env:
-  NAME: PHP
   MATRIX: >-
     [
       {
         "NAME":    "PHP",
         "VERSION": ["5.2"],
         "ARCH":    ["linux/amd64", "linux/386"]
-
       }
     ]
 
@@ -28,9 +26,6 @@ env:
 on:
   workflow_call:
     outputs:
-      name:
-        description: "The project name"
-        value: ${{ jobs.params.outputs.name }}
       matrix:
         description: "The determined version matrix"
         value: ${{ jobs.params.outputs.matrix }}
@@ -43,16 +38,10 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      name: ${{ steps.set-name.outputs.name }}
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       refs: ${{ steps.set-refs.outputs.matrix }}
 
     steps:
-      - name: "Set Name"
-        id: set-name
-        run: |
-          echo '::set-output name=name::${{ env.NAME }}'
-
       - name: "[Set-Output] Matrix"
         id: set-matrix
         run: |
@@ -69,11 +58,6 @@ jobs:
 
       - name: "[DEBUG] Show settings'"
         run: |
-          echo 'Name'
-          echo '--------------------'
-          echo '${{ steps.set-name.outputs.name }}'
-          echo
-
           echo 'Matrix'
           echo '--------------------'
           echo '${{ steps.set-matrix.outputs.matrix }}'
