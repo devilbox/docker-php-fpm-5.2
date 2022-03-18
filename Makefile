@@ -42,7 +42,7 @@ endif
 ARCH       = linux/amd64
 
 # Makefile.lint overwrites
-FL_IGNORES  = .git/,.github/,tests/,data/
+FL_IGNORES  = .git/,.github/,tests/,Dockerfiles/data/
 SC_IGNORES  = .git/,.github/,tests/
 
 
