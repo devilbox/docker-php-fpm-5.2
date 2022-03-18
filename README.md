@@ -19,6 +19,22 @@ This repository will provide you a fully functional PHP-FPM 5.2.17 Docker image 
 |------------|------------------|
 | <a href="https://hub.docker.com/r/devilbox/php-fpm-5.2"><img height="82px" src="http://dockeri.co/image/devilbox/php-fpm-5.2" /></a> | <a href="https://github.com/cytopia/devilbox" ><img height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a> |
 
+## Available Docker tags
+
+| Docker Tag                      | Description                                                  |
+|---------------------------------|--------------------------------------------------------------|
+| `latest`                        | Latest Debian Jessie image (default)                         |
+| `jessie`                        | Latest Debian Jessie image                                   |
+| `stretch`                       | Latest Debian Stretch image                                  |
+|                                 |                                                              |
+| `[0-9]\.[0-9]+`                 | Git tagged Debian Jessie image. E.g: `0.53`                  |
+| `jessie-[0-9]\.[0-9]+`          | Git tagged Debian Jessie image. E.g: `jessie-0.53`           |
+| `stretch-[0-9]\.[0-9]+`         | Git tagged Debian Stretch image. E.g: `stretch-0.53`         |
+|                                 |                                                              |
+| `release-[0-9]\.[0-9]+`         |  Git branch Debian Jessie image. E.g: `release-0.53`         |
+| `jessie-release-[0-9]\.[0-9]+`  |  Git branch Debian Jessie image. E.g: `jessie-release-0.53`  |
+| `stretch-release-[0-9]\.[0-9]+` | Git branch Debian Stretch image. E.g: `stretch-release-0.53` |
+
 ## Similar Base Images
 
 Have a look at the following similar Devilbox base images for which no official versions exist yet:

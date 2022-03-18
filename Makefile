@@ -27,9 +27,18 @@ TAG        = latest
 NAME       = PHP
 VERSION    = 5.2
 IMAGE      = devilbox/php-fpm-$(VERSION)
-DIR        = .
-FILE       = Dockerfile
-DOCKER_TAG = $(TAG)
+FLAVOUR    = latest
+FILE       = Dockerfile.$(FLAVOUR)
+DIR        = Dockerfiles
+ifeq ($(strip $(FLAVOUR)),latest)
+	DOCKER_TAG = $(TAG)
+else
+	ifeq ($(strip $(TAG)),latest)
+		DOCKER_TAG = $(FLAVOUR)
+	else
+		DOCKER_TAG = $(FLAVOUR)-$(TAG)
+	endif
+endif
 ARCH       = linux/amd64
 
 # Makefile.lint overwrites
