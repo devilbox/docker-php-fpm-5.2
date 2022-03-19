@@ -141,9 +141,8 @@ RUN set -eux \
 # Create php.tar.xz
 	&& cd /usr/src \
 	&& tar -cJf php.tar.xz php \
-# Clean-up
 	&& rm -rf php php.tar.gz \
-	&& rm -rf /tmp/php-*
+	&& rm -rf /tmp/php-* \
 # Setup Requirements
 	&& apt update \
 	&& apt install --no-install-recommends --no-install-suggests \
