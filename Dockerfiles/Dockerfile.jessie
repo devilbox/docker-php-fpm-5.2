@@ -5,32 +5,44 @@ MAINTAINER "cytopia" <cytopia@everythingcli.org>
 ENV PHP_VERSION=5.2.17
 ENV PHP_INI_DIR=/usr/local/etc/php
 
-ENV OPENSSL_VERSION=1.0.2g
+# PHP 5.2 does not work with OpenSSL version from Debian Stretch (need to pick it from Jessie)
+# https://github.com/devilbox/docker-php-fpm-5.3/issues/7
+#
+# https://manpages.debian.org/jessie/openssl/openssl.1ssl.en.html
+# https://www.openssl.org/source/old/1.0.1/
+ENV OPENSSL_VERSION=1.0.1t
 
 ENV PHP_BUILD_DEPS \
 	autoconf2.13 \
+	lemon \
 	libbison-dev \
 	libcurl4-openssl-dev \
 	libfl-dev \
+	libmhash-dev \
 	libmysqlclient-dev \
 	libpcre3-dev \
 	libreadline6-dev \
 	librecode-dev \
 	libsqlite3-dev \
+# libssl-dev/oldoldstable 1.0.1t-1
 	libssl-dev \
 	libxml2-dev
 
 ENV PHP_RUNTIME_DEPS \
+	libmhash2 \
 	libmysqlclient18 \
 	libpcre3 \
 	librecode0 \
 	libsqlite3-0 \
+# libssl1.0.0/oldoldstable,now 1.0.1t-1
 	libssl1.0.0 \
 	libxml2 \
 	xz-utils
 
 ENV BUILD_TOOLS \
 	autoconf \
+	bison \
+	bisonc++ \
 	ca-certificates \
 	curl \
 	dpkg-dev \
@@ -90,12 +102,12 @@ RUN set -eux \
 	&& mkdir -p "/usr/local/ssl/lib/${debMultiarch}" \
 	&& ln -s /usr/local/ssl/lib/* "/usr/local/ssl/lib/${debMultiarch}/" \
 # Remove Dependencies
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false \
-		${BUILD_TOOLS} \
 	&& if [ "$(dpkg-architecture --query DEB_HOST_ARCH)" = "i386" ]; then \
 		apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false \
 			${BUILD_TOOLS_32}; \
 	fi \
+	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false \
+		${BUILD_TOOLS} \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -144,9 +156,6 @@ RUN set -eux \
 	&& rm -rf php php.tar.gz \
 	&& rm -rf /tmp/php-* \
 # Setup Requirements
-	&& apt update \
-	&& apt install --no-install-recommends --no-install-suggests \
-		flex -y \
 	&& docker-php-source extract \
 	&& cd /usr/src/php \
 	\
@@ -163,38 +172,40 @@ RUN set -eux \
 		--with-libdir="/lib/${debMultiarch}/" \
 		--with-config-file-path="${PHP_INI_DIR}" \
 		--with-config-file-scan-dir="${PHP_INI_DIR}/conf.d" \
-		--with-fpm-conf="/usr/local/etc/php-fpm.conf" \
-		--enable-fpm \
+# --enable-ftp is included here because ftp_ssl_connect() needs ftp to be compiled statically (see https://github.com/docker-library/php/issues/236)
+		--enable-ftp \
+		--with-openssl-dir=/usr/local/ssl \
 		\
+# --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
+		--enable-mbstring \
+		\
+# PHP-FPM support
 		--enable-fastcgi \
 		--enable-force-cgi-redirect \
+		--enable-fpm \
+		--with-fpm-conf="/usr/local/etc/php-fpm.conf" \
+# https://github.com/docker-library/php/issues/439
+		--with-mhash \
 		\
-		--enable-mbstring \
-		--enable-soap \
-		--enable-pdo \
-		\
-		--with-mysql \
-		--with-mysqli \
 		--with-curl \
 		--with-openssl=/usr/local/ssl \
-		--with-pdo-mysql \
 		--with-readline \
+		--with-recode \
 		--with-zlib \
 	&& make -j"$(nproc)" \
 	&& make install \
-	&& php -v \
 # Cleanup
 	&& make clean \
 	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
 	&& docker-php-source delete \
 # Remove Dependencies
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false \
-		${PHP_BUILD_DEPS} \
-		${BUILD_TOOLS} \
 	&& if [ "$(dpkg-architecture --query DEB_HOST_ARCH)" = "i386" ]; then \
 		apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false \
 			${BUILD_TOOLS_32}; \
 	fi \
+	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false \
+		${PHP_BUILD_DEPS} \
+		${BUILD_TOOLS} \
 # Install Run-time requirements
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends --no-install-suggests \
