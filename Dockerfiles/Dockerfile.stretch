@@ -126,7 +126,8 @@ RUN set -eux \
 ### Copy PHP scripts and patches
 ###
 COPY data/docker-php-source /usr/local/bin/
-COPY data/php-${PHP_VERSION}*.patch /tmp/
+COPY data/php/php-${PHP_VERSION}.tar.xz /usr/src/php.tar.xz
+COPY data/php/php-${PHP_VERSION}*.patch /tmp/
 
 
 ###
@@ -142,17 +143,14 @@ RUN set -eux \
 		apt-get install -y --no-install-recommends --no-install-suggests \
 			${BUILD_TOOLS_32}; \
 	fi \
-# Fetch PHP
-	&& curl -sS -k -L --fail "http://museum.php.net/php5/php-${PHP_VERSION}.tar.gz" -o /usr/src/php.tar.gz \
-# Extract artifacts
-	&& tar -xf /usr/src/php.tar.gz -C /usr/src/php --strip-components=1 \
-# Apply patches
+# Extract and apply patches
+	&& docker-php-source extract \
 	&& cd /usr/src/php \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-libxml2.patch \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-openssl.patch \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-fpm.patch \
 	&& (patch -p0 < /tmp/php-${PHP_VERSION}-curl.patch || true) \
-# Create php.tar.xz
+# Create new php.tar.xz
 	&& cd /usr/src \
 	&& tar -cJf php.tar.xz php \
 	&& rm -rf php php.tar.gz \
@@ -217,7 +215,9 @@ RUN set -eux \
 		${PHP_RUNTIME_DEPS} \
 		${RUNTIME_TOOLS} \
 	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/*
+	&& rm -rf /var/lib/apt/lists/* \
+# Setup extension dir
+	&& mkdir -p "$(php -r 'echo ini_get("extension_dir");')"
 
 
 COPY data/docker-php-* /usr/local/bin/
