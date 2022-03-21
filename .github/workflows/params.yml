@@ -16,7 +16,7 @@ env:
         "NAME":    "PHP",
         "VERSION": ["5.2"],
         "FLAVOUR": ["jessie", "stretch", "latest"],
-        "ARCH":    ["linux/amd64", "linux/386"]
+        "ARCH":    ["linux/amd64", "linux/386", "linux/arm64"]
       }
     ]
 

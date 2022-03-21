@@ -128,6 +128,7 @@ RUN set -eux \
 COPY data/docker-php-source /usr/local/bin/
 COPY data/php/php-${PHP_VERSION}.tar.xz /usr/src/php.tar.xz
 COPY data/php/php-${PHP_VERSION}*.patch /tmp/
+COPY data/php/config.guess /tmp/config.guess
 
 
 ###
@@ -150,6 +151,9 @@ RUN set -eux \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-openssl.patch \
 	&& patch -p1 < /tmp/php-${PHP_VERSION}-fpm.patch \
 	&& (patch -p0 < /tmp/php-${PHP_VERSION}-curl.patch || true) \
+# Apply config.guess with aarch64 support
+	&& rm config.guess \
+	&& cp /tmp/config.guess config.guess \
 # Create new php.tar.xz
 	&& cd /usr/src \
 	&& tar -cJf php.tar.xz php \
@@ -219,6 +223,10 @@ RUN set -eux \
 # Setup extension dir
 	&& mkdir -p "$(php -r 'echo ini_get("extension_dir");')"
 
+# Fix config.guess for PHP modules (adds 'aarch64' [arm64] architecture)
+# The config.guess has been copied from PHP 5.5
+COPY data/php/usr-local-lib-php-build-config.guess /usr/local/lib/php/build/config.guess
+COPY data/php/usr-local-lib-php-build-config.sub /usr/local/lib/php/build/config.sub
 
 COPY data/docker-php-* /usr/local/bin/
 COPY data/php-fpm /usr/local/sbin/php-fpm
