@@ -231,7 +231,7 @@ Currently it does not work with Apache 2.2. See matrix below for usage.
 Have a look at the following similar Devilbox base images for which no official versions exist yet:
 
 * **[`PHP-FPM 5.2`](https://github.com/devilbox/docker-php-fpm-5.2)** **[`PHP-FPM 5.3`](https://github.com/devilbox/docker-php-fpm-5.3)** **[`PHP-FPM 5.4`](https://github.com/devilbox/docker-php-fpm-5.4)** **[`PHP-FPM 5.5`](https://github.com/devilbox/docker-php-fpm-5.5)**
-* **[`PHP-FPM 8.0`](https://github.com/devilbox/docker-php-fpm-8.0)** **[`PHP-FPM 8.1`](https://github.com/devilbox/docker-php-fpm-8.1)** **[`PHP-FPM 8.2`](https://github.com/devilbox/docker-php-fpm-8.2)** **[`PHP-FPM 8.3`](https://github.com/devilbox/docker-php-fpm-8.2)**
+* **[`PHP-FPM 8.0`](https://github.com/devilbox/docker-php-fpm-8.0)** **[`PHP-FPM 8.1`](https://github.com/devilbox/docker-php-fpm-8.1)** **[`PHP-FPM 8.2`](https://github.com/devilbox/docker-php-fpm-8.2)** **[`PHP-FPM 8.3`](https://github.com/devilbox/docker-php-fpm-8.3)**
 
 In case you are looking for development and production ready PHP-FPM images for all versions,
 which have a vast amount of modules enabled by default go here: **[PHP-FPM](https://github.com/devilbox/docker-php-fpm)**
